@@ -23,7 +23,8 @@ OWN-WORLD: SF-Systemstack; iOS-Systempalette (systemBlue #007AFF/#0A84FF als
 einziger Akzent, systemGray6-Gründe, Hairlines rgba(60,60,67,.29)); iMessage-
 Bubbles 18px, Blau aus/Grau ein; translucente Bars (blur+saturate); stroked
 SVG-Icons in SF-Symbols-Anmutung; Avatare mit personengebundenem Farbverlauf
-(Snapchat-Hauch); Light + Dark.
+(Snapchat-Hauch); Light + Dark. Einzige weitere Farbe: Präsenz-Dot in
+systemGreen (#34C759/#30D158) als rein semantisches Signal, nie als Akzent.
 
 STORY: Öffnen → „Chats" als Large Title → schreiben in eigener Sprache, lesen
 in eigener Sprache; unter der letzten eigenen Nachricht „Zugestellt/Gelesen";

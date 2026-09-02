@@ -324,25 +324,38 @@ button { font-family: inherit; color: inherit; }
   display: flex;
   align-items: center;
   gap: 12px;
+  width: 100%;
   padding: 9px 16px;
   cursor: pointer;
   transition: background 0.12s ease-out;
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
 }
+
+.chat-item:focus-visible { outline-offset: -2px; }
 
 .chat-item:hover { background: var(--fill); }
 .chat-item.active { background: var(--tint); }
 
 .avatar-wrap { position: relative; }
 
+/* Präsenz-Dot: rein semantisches Signal in systemGreen (Contract, OWN-WORLD) */
 .online-dot {
   width: 12px;
   height: 12px;
-  background: #30c94e;
+  background: #34c759;
   border-radius: 50%;
   border: 2.5px solid var(--bg);
   position: absolute;
   right: -1px;
   bottom: -1px;
+}
+
+@media (prefers-color-scheme: dark) {
+  .online-dot { background: #30d158; }
 }
 
 .chat-item-main { flex: 1; min-width: 0; border-bottom: 0.5px solid var(--separator); padding: 6px 0 10px; }
@@ -431,21 +444,32 @@ button { font-family: inherit; color: inherit; }
 .chat-header {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 8px 14px;
+  justify-content: center;
+  padding: 8px 52px;
   background: var(--panel-translucent);
   backdrop-filter: blur(18px) saturate(1.6);
   -webkit-backdrop-filter: blur(18px) saturate(1.6);
   border-bottom: 0.5px solid var(--separator);
   position: relative;
   z-index: 2;
+  min-height: 54px;
 }
 
-.back-btn { display: none; margin-left: -8px; }
+.back-btn { display: none; position: absolute; left: 8px; top: 50%; transform: translateY(-50%); }
+#btn-add-member { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); }
+
+/* Contract, FIRST VIEWPORT: Name + Status zentriert im translucenten Header */
+.peer-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-width: 0;
+}
 
 .chat-header .avatar { width: 38px; height: 38px; min-width: 38px; font-size: 15px; }
 
-.peer-info { min-width: 0; flex: 1; }
+.peer-info { min-width: 0; text-align: center; }
 .peer-name { font-weight: 600; font-size: 16.5px; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .peer-status {
   font-size: 13px;
@@ -455,13 +479,7 @@ button { font-family: inherit; color: inherit; }
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.peer-status.online { color: #1fa83c; }
 .peer-status.typing { color: var(--accent); }
-
-@media (prefers-color-scheme: dark) {
-  .peer-status.online { color: #30d158; }
-  .online-dot { background: #30d158; }
-}
 
 .messages {
   flex: 1;
@@ -475,7 +493,7 @@ button { font-family: inherit; color: inherit; }
 
 .day-divider {
   align-self: center;
-  color: var(--tertiary);
+  color: var(--secondary);
   font-size: 12px;
   font-weight: 600;
   padding: 14px 0 8px;
@@ -516,11 +534,12 @@ button { font-family: inherit; color: inherit; }
 .bubble + .bubble { margin-top: 2px; }
 .bubble.in + .bubble.out, .bubble.out + .bubble.in { margin-top: 10px; }
 
-/* Signature-Moment: Die Bubble löst sich aus der Eingabe-Pille */
+/* Signature-Moment: Die Bubble löst sich aus der Eingabe-Pille.
+   --send-dx/--send-dy werden per FLIP aus der echten Pillen-Position gesetzt. */
 @keyframes bubble-send {
-  0% { transform: translateY(14px) scale(0.86); opacity: 0.4; }
-  60% { transform: translateY(-2px) scale(1.01); opacity: 1; }
-  100% { transform: translateY(0) scale(1); }
+  0% { transform: translate(var(--send-dx, 0px), var(--send-dy, 14px)) scale(0.9); opacity: 0.5; }
+  70% { transform: translate(0, -2px) scale(1.005); opacity: 1; }
+  100% { transform: translate(0, 0) scale(1); }
 }
 
 @keyframes bubble-receive {
@@ -528,23 +547,12 @@ button { font-family: inherit; color: inherit; }
   100% { transform: translateY(0) scale(1); opacity: 1; }
 }
 
-.bubble.anim-out { animation: bubble-send 0.34s cubic-bezier(0.16, 1, 0.3, 1); transform-origin: bottom right; }
+.bubble.anim-out { animation: bubble-send 0.38s cubic-bezier(0.16, 1, 0.3, 1); transform-origin: bottom right; }
 .bubble.anim-in { animation: bubble-receive 0.28s cubic-bezier(0.16, 1, 0.3, 1); transform-origin: bottom left; }
 
 @media (prefers-reduced-motion: reduce) {
   .bubble.anim-out, .bubble.anim-in { animation: none; }
   .sheet { animation: none !important; }
-}
-
-.bubble-time {
-  display: inline-block;
-  font-size: 11px;
-  opacity: 0.75;
-  margin-left: 8px;
-  float: right;
-  padding-top: 6px;
-  font-variant-numeric: tabular-nums;
-  user-select: none;
 }
 
 .original-toggle {
@@ -561,7 +569,7 @@ button { font-family: inherit; color: inherit; }
   opacity: 0.75;
 }
 
-.original-toggle:hover { opacity: 1; text-decoration: underline; }
+.original-toggle:hover { opacity: 1; }
 
 .original-text {
   clear: both;
@@ -586,6 +594,28 @@ button { font-family: inherit; color: inherit; }
   color: var(--secondary);
   padding: 3px 6px 0;
   font-weight: 500;
+}
+
+/* Ladezustand beim Öffnen eines Chats */
+.messages-loading {
+  align-self: center;
+  margin: auto;
+  width: 26px;
+  height: 26px;
+  border: 3px solid var(--fill-strong);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.composer-error {
+  font-size: 13px;
+  color: var(--destructive);
+  text-align: center;
+  padding: 6px 12px 0;
+  background: var(--panel-translucent);
 }
 
 .typing-row { align-self: flex-start; display: flex; gap: 4px; padding: 10px 14px; }
@@ -668,17 +698,33 @@ button { font-family: inherit; color: inherit; }
   flex-direction: column;
   gap: 14px;
   box-shadow: var(--shadow-sheet);
-  animation: sheet-up 0.32s cubic-bezier(0.2, 0.9, 0.3, 1);
+  /* Contract, SIGNATURE: Sheets fahren iOS-typisch über die volle Höhe auf */
+  animation: sheet-up 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes sheet-up {
-  from { transform: translateY(48px); opacity: 0.6; }
-  to { transform: translateY(0); opacity: 1; }
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.sheet-backdrop { animation: backdrop-dim 0.3s ease-out; }
+
+@keyframes backdrop-dim {
+  from { background: rgba(0, 0, 0, 0); }
+  to { background: rgba(0, 0, 0, 0.4); }
 }
 
 @media (min-width: 761px) {
   .sheet-backdrop { align-items: center; padding: 24px; }
-  .sheet { border-radius: 16px; box-shadow: var(--shadow-pop); }
+  .sheet {
+    border-radius: 16px;
+    box-shadow: var(--shadow-pop);
+    animation: sheet-pop 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes sheet-pop {
+    from { transform: translateY(28px) scale(0.98); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+  }
 }
 
 .sheet-handle {
@@ -744,13 +790,13 @@ button { font-family: inherit; color: inherit; }
 .profile-username { font-size: 14px; color: var(--secondary); }
 
 .id-card {
-  background: linear-gradient(150deg, #3ea2ff, #0a5fd7);
+  background: linear-gradient(150deg, #1e6fe0, #0a4fae);
   border-radius: 14px;
   padding: 16px;
   color: #fff;
 }
 
-.id-card-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; opacity: 0.9; }
+.id-card-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; }
 
 .id-card-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 6px; }
 
@@ -765,7 +811,7 @@ button { font-family: inherit; color: inherit; }
 .id-card .btn-tinted { background: rgba(255, 255, 255, 0.22); color: #fff; }
 .id-card .btn-tinted:hover { background: rgba(255, 255, 255, 0.34); }
 
-.id-card-hint { font-size: 12.5px; margin-top: 9px; opacity: 0.92; line-height: 1.35; }
+.id-card-hint { font-size: 12.5px; margin-top: 9px; line-height: 1.35; }
 
 /* -------------------------------------------------------------------- Mobil */
 

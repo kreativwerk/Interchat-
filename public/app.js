@@ -228,7 +228,8 @@ function renderChatList() {
   chatListEmptyEl.classList.toggle('hidden', state.chats.length > 0);
 
   for (const chat of state.chats) {
-    const item = document.createElement('div');
+    const item = document.createElement('button');
+    item.type = 'button';
     item.className = 'chat-item' + (state.activeConv?.id === chat.id ? ' active' : '');
 
     const avatarWrap = document.createElement('div');
@@ -279,14 +280,32 @@ function renderChatList() {
 
 // ---------------------------------------------------------------- Konversation
 
-async function openChat(conversationId) {
-  const data = await api(`/api/conversations/${conversationId}/messages`);
-  state.activeConv = data.conversation;
-  state.messages = data.messages;
+let openChatSeq = 0;
 
+async function openChat(conversationId) {
+  const seq = ++openChatSeq;
+
+  // Ladezustand sofort zeigen, statt stumm aufs Netz zu warten.
   $('chat-placeholder').classList.add('hidden');
   $('chat-active').classList.remove('hidden');
   appView.classList.add('mobile-chat-open');
+  messagesEl.innerHTML = '<div class="messages-loading" role="status" aria-label="Lädt"></div>';
+
+  // Konversation sofort aktiv setzen (Header aus der Chatliste, sofern
+  // bekannt), damit Live-Events während des Ladens richtig zugeordnet werden.
+  const summary = state.chats.find((c) => c.id === conversationId);
+  state.activeConv = summary || { id: conversationId, type: 'direct', title: '', members: [] };
+  state.messages = [];
+  if (summary) renderPeerHeader();
+
+  const data = await api(`/api/conversations/${conversationId}/messages`);
+  // Inzwischen wurde ein anderer Chat geöffnet? Dann diese Antwort verwerfen.
+  if (seq !== openChatSeq) return;
+
+  // Nachrichten, die während des Ladens live eintrafen, nicht verlieren.
+  const local = state.messages.filter((m) => !data.messages.some((f) => f.id === m.id));
+  state.activeConv = data.conversation;
+  state.messages = data.messages.concat(local).sort((a, b) => a.id - b.id);
 
   renderPeerHeader();
   renderMessages();
@@ -357,11 +376,6 @@ function buildBubble(msg, opts = {}) {
   mainText.textContent = showTranslation ? msg.translation.text : msg.original.text;
   bubble.appendChild(mainText);
 
-  const time = document.createElement('span');
-  time.className = 'bubble-time';
-  time.textContent = formatTime(msg.createdAt);
-  bubble.appendChild(time);
-
   if (showTranslation) {
     const toggle = document.createElement('button');
     toggle.type = 'button';
@@ -390,24 +404,35 @@ function buildBubble(msg, opts = {}) {
   return fragment;
 }
 
+// Zeit-Divider wie in Apples Nachrichten-App: „Heute 20:04" bei Tageswechsel
+// oder nach längerer Pause – die Bubbles selbst tragen keine Uhrzeit.
+const DIVIDER_GAP_MS = 60 * 60 * 1000;
+
+function dividerLabel(prevMsg, msg) {
+  if (prevMsg && formatDay(prevMsg.createdAt) === formatDay(msg.createdAt)
+    && msg.createdAt - prevMsg.createdAt < DIVIDER_GAP_MS) return null;
+  return `${formatDay(msg.createdAt)} ${formatTime(msg.createdAt)}`;
+}
+
+function appendDivider(label) {
+  const divider = document.createElement('div');
+  divider.className = 'day-divider';
+  divider.textContent = label;
+  messagesEl.appendChild(divider);
+}
+
 // Status („Zugestellt" / „Gelesen") nur unter der letzten eigenen Nachricht,
 // wie in Apples Nachrichten-App.
 function renderMessages() {
   messagesEl.innerHTML = '';
-  let lastDay = '';
-  let prevSender = null;
+  let prevMsg = null;
   for (const msg of state.messages) {
-    const day = formatDay(msg.createdAt);
-    if (day !== lastDay) {
-      const divider = document.createElement('div');
-      divider.className = 'day-divider';
-      divider.textContent = day;
-      messagesEl.appendChild(divider);
-      lastDay = day;
-      prevSender = null;
-    }
-    messagesEl.appendChild(buildBubble(msg, { showSender: msg.senderId !== prevSender }));
-    prevSender = msg.senderId;
+    const label = dividerLabel(prevMsg, msg);
+    if (label) appendDivider(label);
+    messagesEl.appendChild(buildBubble(msg, {
+      showSender: label !== null || !prevMsg || msg.senderId !== prevMsg.senderId,
+    }));
+    prevMsg = msg;
   }
   appendStatusRow();
   renderTypingRow();
@@ -441,16 +466,12 @@ function renderTypingRow() {
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
-// Beim Live-Anhängen sicherstellen, dass der Tages-Divider existiert.
-function ensureDayDivider(msg) {
-  const day = formatDay(msg.createdAt);
-  const dividers = messagesEl.querySelectorAll('.day-divider');
-  const last = dividers[dividers.length - 1];
-  if (last && last.textContent === day) return;
-  const divider = document.createElement('div');
-  divider.className = 'day-divider';
-  divider.textContent = day;
-  messagesEl.appendChild(divider);
+// Beim Live-Anhängen sicherstellen, dass der Zeit-Divider existiert.
+// Erwartet, dass msg bereits als letztes Element in state.messages steht.
+function ensureDivider(msg) {
+  const prevMsg = state.messages[state.messages.length - 2] || null;
+  const label = dividerLabel(prevMsg, msg);
+  if (label) appendDivider(label);
 }
 
 function markRead() {
@@ -481,6 +502,25 @@ function stopTyping() {
   state.isTypingSent = false;
 }
 
+function showComposerError(text) {
+  document.querySelector('.composer-error')?.remove();
+  if (!text) return;
+  const el = document.createElement('div');
+  el.className = 'composer-error';
+  el.setAttribute('role', 'alert');
+  el.textContent = text;
+  $('composer').before(el);
+  setTimeout(() => el.remove(), 4000);
+}
+
+// Signature-Moment: die neue Bubble startet per FLIP an der Eingabe-Pille.
+function animateFromComposer(bubble) {
+  const inputRect = $('message-input').getBoundingClientRect();
+  const bubbleRect = bubble.getBoundingClientRect();
+  bubble.style.setProperty('--send-dx', `${inputRect.right - bubbleRect.right}px`);
+  bubble.style.setProperty('--send-dy', `${inputRect.top - bubbleRect.top}px`);
+}
+
 $('composer').addEventListener('submit', (e) => {
   e.preventDefault();
   const input = $('message-input');
@@ -489,13 +529,23 @@ $('composer').addEventListener('submit', (e) => {
   input.value = '';
   $('send-btn').disabled = true;
   stopTyping();
+  showComposerError('');
 
   state.socket.emit('message:send', { conversationId: state.activeConv.id, text }, (res) => {
-    if (res?.error || !res?.message) return;
+    if (res?.error || !res?.message) {
+      // Nichts verlieren: Text zurück in die Eingabe, Fehler benennen.
+      input.value = input.value || text;
+      $('send-btn').disabled = input.value.trim() === '';
+      showComposerError('Senden fehlgeschlagen. Bitte erneut versuchen.');
+      return;
+    }
     state.messages.push(res.message);
     messagesEl.querySelector('.message-status')?.remove();
-    ensureDayDivider(res.message);
-    messagesEl.appendChild(buildBubble(res.message, { animate: true }));
+    ensureDivider(res.message);
+    const fragment = buildBubble(res.message, { animate: true });
+    messagesEl.appendChild(fragment);
+    const bubble = messagesEl.querySelector(`[data-message-id="${res.message.id}"]`);
+    if (bubble) animateFromComposer(bubble);
     appendStatusRow();
     messagesEl.scrollTop = messagesEl.scrollHeight;
     loadChats();
@@ -515,7 +565,7 @@ function connectSocket() {
       const prev = state.messages[state.messages.length - 2];
       messagesEl.querySelector('.message-status')?.remove();
       messagesEl.querySelector('.typing-row')?.remove();
-      ensureDayDivider(message);
+      ensureDivider(message);
       messagesEl.appendChild(buildBubble(message, {
         animate: true,
         showSender: !prev || prev.senderId !== message.senderId,
