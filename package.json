@@ -1,0 +1,19 @@
+{
+  "name": "interchat",
+  "version": "0.1.0",
+  "description": "Messenger im WhatsApp-Stil mit automatischer Übersetzung – jeder schreibt und liest in seiner eigenen Sprache.",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node --watch server/index.js"
+  },
+  "engines": {
+    "node": ">=22.5"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "socket.io": "^4.7.5"
+  }
+}

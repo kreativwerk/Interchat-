@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#008069">
+  <title>InterChat – Chatten ohne Sprachbarriere</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Anmeldung / Registrierung -->
+  <div id="auth-view" class="auth-view hidden">
+    <div class="auth-card">
+      <div class="auth-logo">💬</div>
+      <h1>InterChat</h1>
+      <p class="auth-tagline">Du schreibst in deiner Sprache – dein Gegenüber liest in seiner.</p>
+
+      <div class="auth-tabs">
+        <button id="tab-login" class="auth-tab active" type="button">Anmelden</button>
+        <button id="tab-register" class="auth-tab" type="button">Registrieren</button>
+      </div>
+
+      <form id="auth-form" autocomplete="on">
+        <input id="auth-username" type="text" placeholder="Benutzername" autocomplete="username" required>
+        <input id="auth-password" type="password" placeholder="Passwort (mind. 6 Zeichen)" autocomplete="current-password" required>
+        <div id="register-fields" class="hidden">
+          <input id="auth-displayname" type="text" placeholder="Anzeigename (optional)">
+          <label class="lang-label" for="auth-language">Meine Sprache</label>
+          <select id="auth-language"></select>
+        </div>
+        <button id="auth-submit" class="btn-primary" type="submit">Anmelden</button>
+        <p id="auth-error" class="auth-error"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Haupt-App -->
+  <div id="app-view" class="app hidden">
+    <!-- Seitenleiste: Chatliste -->
+    <aside id="sidebar" class="sidebar">
+      <header class="sidebar-header">
+        <div class="me">
+          <div id="me-avatar" class="avatar"></div>
+          <div class="me-info">
+            <div id="me-name" class="me-name"></div>
+            <div id="me-lang" class="me-lang"></div>
+          </div>
+        </div>
+        <div class="sidebar-actions">
+          <button id="btn-new-chat" class="icon-btn" title="Neuer Chat" type="button">✏️</button>
+          <button id="btn-settings" class="icon-btn" title="Einstellungen" type="button">⚙️</button>
+        </div>
+      </header>
+      <div id="chat-list" class="chat-list">
+        <div class="empty-hint" id="chat-list-empty">
+          Noch keine Chats.<br>Starte mit ✏️ einen neuen Chat.
+        </div>
+      </div>
+    </aside>
+
+    <!-- Chatbereich -->
+    <main id="chat-pane" class="chat-pane no-chat">
+      <div id="chat-placeholder" class="chat-placeholder">
+        <div class="placeholder-logo">🌍</div>
+        <h2>InterChat</h2>
+        <p>Nachrichten werden automatisch in die Sprache des Empfängers übersetzt.</p>
+      </div>
+
+      <div id="chat-active" class="chat-active hidden">
+        <header class="chat-header">
+          <button id="btn-back" class="icon-btn back-btn" type="button">←</button>
+          <div id="peer-avatar" class="avatar"></div>
+          <div class="peer-info">
+            <div id="peer-name" class="peer-name"></div>
+            <div id="peer-status" class="peer-status"></div>
+          </div>
+        </header>
+        <div id="messages" class="messages"></div>
+        <form id="composer" class="composer">
+          <input id="message-input" type="text" placeholder="Nachricht schreiben…" autocomplete="off" maxlength="4000">
+          <button class="send-btn" type="submit" title="Senden">➤</button>
+        </form>
+      </div>
+    </main>
+  </div>
+
+  <!-- Neuer Chat -->
+  <div id="modal-new-chat" class="modal-backdrop hidden">
+    <div class="modal">
+      <h3>Neuer Chat</h3>
+      <input id="user-search" type="text" placeholder="Benutzername suchen…" autocomplete="off">
+      <div id="user-results" class="user-results"></div>
+      <button class="btn-secondary modal-close" type="button">Schließen</button>
+    </div>
+  </div>
+
+  <!-- Einstellungen -->
+  <div id="modal-settings" class="modal-backdrop hidden">
+    <div class="modal">
+      <h3>Einstellungen</h3>
+      <label class="lang-label" for="settings-displayname">Anzeigename</label>
+      <input id="settings-displayname" type="text" maxlength="48">
+      <label class="lang-label" for="settings-language">Meine Sprache</label>
+      <select id="settings-language"></select>
+      <p class="settings-hint">Neue eingehende Nachrichten werden in diese Sprache übersetzt.</p>
+      <button id="settings-save" class="btn-primary" type="button">Speichern</button>
+      <button id="btn-logout" class="btn-danger" type="button">Abmelden</button>
+      <button class="btn-secondary modal-close" type="button">Schließen</button>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
