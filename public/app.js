@@ -3,18 +3,16 @@
 // ------------------------------------------------------------------ Sprachen
 
 const LANGUAGES = {
-  ar: '🇸🇦 Arabisch', cs: '🇨🇿 Tschechisch', da: '🇩🇰 Dänisch', de: '🇩🇪 Deutsch',
-  el: '🇬🇷 Griechisch', en: '🇬🇧 Englisch', es: '🇪🇸 Spanisch', fi: '🇫🇮 Finnisch',
-  fr: '🇫🇷 Französisch', hi: '🇮🇳 Hindi', hu: '🇭🇺 Ungarisch', id: '🇮🇩 Indonesisch',
-  it: '🇮🇹 Italienisch', ja: '🇯🇵 Japanisch', ko: '🇰🇷 Koreanisch', nl: '🇳🇱 Niederländisch',
-  no: '🇳🇴 Norwegisch', pl: '🇵🇱 Polnisch', pt: '🇵🇹 Portugiesisch', ro: '🇷🇴 Rumänisch',
-  ru: '🇷🇺 Russisch', sv: '🇸🇪 Schwedisch', th: '🇹🇭 Thailändisch', tr: '🇹🇷 Türkisch',
-  uk: '🇺🇦 Ukrainisch', vi: '🇻🇳 Vietnamesisch', zh: '🇨🇳 Chinesisch',
+  ar: 'Arabisch', cs: 'Tschechisch', da: 'Dänisch', de: 'Deutsch',
+  el: 'Griechisch', en: 'Englisch', es: 'Spanisch', fi: 'Finnisch',
+  fr: 'Französisch', hi: 'Hindi', hu: 'Ungarisch', id: 'Indonesisch',
+  it: 'Italienisch', ja: 'Japanisch', ko: 'Koreanisch', nl: 'Niederländisch',
+  no: 'Norwegisch', pl: 'Polnisch', pt: 'Portugiesisch', ro: 'Rumänisch',
+  ru: 'Russisch', sv: 'Schwedisch', th: 'Thailändisch', tr: 'Türkisch',
+  uk: 'Ukrainisch', vi: 'Vietnamesisch', zh: 'Chinesisch',
 };
 
-function langLabel(code) {
-  return LANGUAGES[code] || code;
-}
+const langLabel = (code) => LANGUAGES[code] || code;
 
 // --------------------------------------------------------------------- State
 
@@ -22,18 +20,17 @@ const state = {
   token: localStorage.getItem('interchat.token') || null,
   me: null,
   socket: null,
-  chats: [],                 // [{peer, online, unread, lastMessage}]
-  activePeer: null,          // Nutzerobjekt des offenen Chats
-  messages: [],              // Nachrichten des offenen Chats
-  typingPeers: new Set(),
+  chats: [],                    // Konversations-Zusammenfassungen
+  activeConv: null,             // aktive Konversation (Summary)
+  messages: [],
+  typing: new Map(),            // convId -> Map(userId -> name)
   typingTimer: null,
   isTypingSent: false,
+  groupDraft: [],               // Mitglieder beim Gruppen-Anlegen
+  directPeer: null,             // aufgelöster Kontakt im Direkt-Tab
 };
 
-// ----------------------------------------------------------------------- DOM
-
 const $ = (id) => document.getElementById(id);
-
 const authView = $('auth-view');
 const appView = $('app-view');
 const chatListEl = $('chat-list');
@@ -52,8 +49,40 @@ async function api(path, options = {}) {
     },
   });
   const data = await res.json().catch(() => ({}));
-  if (!res.ok) throw Object.assign(new Error(data.error || 'request_failed'), { code: data.error, status: res.status });
+  if (!res.ok) {
+    throw Object.assign(new Error(data.error || 'request_failed'), {
+      code: data.error,
+      status: res.status,
+    });
+  }
   return data;
+}
+
+// -------------------------------------------------------------------- Avatare
+
+function initials(name) {
+  return String(name || '?').trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join('');
+}
+
+function hashHue(seed) {
+  let h = 0;
+  for (const ch of String(seed)) h = (h * 31 + ch.codePointAt(0)) % 360;
+  return h;
+}
+
+function paintAvatar(el, name, seed) {
+  const hue = hashHue(seed ?? name);
+  el.textContent = initials(name);
+  el.style.background =
+    `linear-gradient(150deg, hsl(${hue} 72% 58%), hsl(${(hue + 42) % 360} 72% 42%))`;
+}
+
+function paintChatAvatar(el, chat) {
+  if (chat.type === 'group') {
+    paintAvatar(el, chat.title, `group:${chat.id}`);
+  } else {
+    paintAvatar(el, chat.title, `user:${chat.peerId}`);
+  }
 }
 
 // ---------------------------------------------------------------------- Auth
@@ -75,6 +104,8 @@ function setAuthMode(mode) {
   authMode = mode;
   $('tab-login').classList.toggle('active', mode === 'login');
   $('tab-register').classList.toggle('active', mode === 'register');
+  $('tab-login').setAttribute('aria-selected', String(mode === 'login'));
+  $('tab-register').setAttribute('aria-selected', String(mode === 'register'));
   $('register-fields').classList.toggle('hidden', mode !== 'register');
   $('auth-submit').textContent = mode === 'login' ? 'Anmelden' : 'Konto erstellen';
   $('auth-password').autocomplete = mode === 'login' ? 'current-password' : 'new-password';
@@ -83,7 +114,7 @@ function setAuthMode(mode) {
 
 const AUTH_ERRORS = {
   invalid_username: 'Benutzername: 3–24 Zeichen, nur Kleinbuchstaben, Zahlen, Punkt, Unterstrich.',
-  weak_password: 'Das Passwort muss mindestens 6 Zeichen haben.',
+  weak_password: 'Das Passwort braucht mindestens 6 Zeichen.',
   username_taken: 'Dieser Benutzername ist bereits vergeben.',
   invalid_credentials: 'Benutzername oder Passwort ist falsch.',
   invalid_language: 'Bitte eine gültige Sprache wählen.',
@@ -117,15 +148,12 @@ $('auth-form').addEventListener('submit', async (e) => {
     state.me = data.user;
     enterApp();
   } catch (err) {
-    $('auth-error').textContent = AUTH_ERRORS[err.code] || 'Das hat leider nicht geklappt. Bitte erneut versuchen.';
+    $('auth-error').textContent =
+      AUTH_ERRORS[err.code] || 'Das hat nicht geklappt. Bitte erneut versuchen.';
   }
 });
 
 // ----------------------------------------------------------------- App-Start
-
-function initials(name) {
-  return name.trim().split(/\s+/).slice(0, 2).map((p) => p[0]).join('');
-}
 
 function showAuth() {
   authView.classList.remove('hidden');
@@ -142,9 +170,7 @@ async function enterApp() {
 }
 
 function renderMe() {
-  $('me-avatar').textContent = initials(state.me.displayName);
-  $('me-name').textContent = state.me.displayName;
-  $('me-lang').textContent = langLabel(state.me.language);
+  paintAvatar($('me-avatar'), state.me.displayName, `user:${state.me.id}`);
 }
 
 function logout() {
@@ -158,6 +184,13 @@ function logout() {
 async function loadChats() {
   const data = await api('/api/chats');
   state.chats = data.chats;
+  if (state.activeConv) {
+    const fresh = state.chats.find((c) => c.id === state.activeConv.id);
+    if (fresh) {
+      state.activeConv = fresh;
+      renderPeerHeader();
+    }
+  }
   renderChatList();
 }
 
@@ -175,27 +208,34 @@ function formatDay(ts) {
   return d.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
+function typingNames(convId) {
+  const byUser = state.typing.get(convId);
+  return byUser && byUser.size ? [...byUser.values()] : [];
+}
+
 function previewText(chat) {
+  const names = typingNames(chat.id);
+  if (names.length) return { text: 'schreibt …', typing: true };
   const m = chat.lastMessage;
-  if (!m) return '';
-  const text = m.translation ? m.translation.text : m.original.text;
-  return (m.outgoing ? 'Du: ' : '') + text;
+  if (!m) return { text: 'Sag Hallo!', typing: false };
+  const text = m.translation && m.translation.translated ? m.translation.text : m.original.text;
+  const prefix = m.outgoing ? 'Du: ' : chat.type === 'group' && m.senderName ? `${m.senderName}: ` : '';
+  return { text: prefix + text, typing: false };
 }
 
 function renderChatList() {
   chatListEl.innerHTML = '';
-  if (state.chats.length === 0) chatListEl.appendChild(chatListEmptyEl);
+  chatListEmptyEl.classList.toggle('hidden', state.chats.length > 0);
 
   for (const chat of state.chats) {
     const item = document.createElement('div');
-    item.className = 'chat-item' + (state.activePeer?.id === chat.peer.id ? ' active' : '');
-    item.dataset.peerId = chat.peer.id;
+    item.className = 'chat-item' + (state.activeConv?.id === chat.id ? ' active' : '');
 
     const avatarWrap = document.createElement('div');
     avatarWrap.className = 'avatar-wrap';
     const avatar = document.createElement('div');
     avatar.className = 'avatar';
-    avatar.textContent = initials(chat.peer.displayName);
+    paintChatAvatar(avatar, chat);
     avatarWrap.appendChild(avatar);
     if (chat.online) {
       const dot = document.createElement('div');
@@ -210,7 +250,7 @@ function renderChatList() {
     top.className = 'chat-item-top';
     const name = document.createElement('div');
     name.className = 'chat-item-name';
-    name.textContent = chat.peer.displayName;
+    name.textContent = chat.title;
     const time = document.createElement('div');
     time.className = 'chat-item-time';
     time.textContent = chat.lastMessage ? formatTime(chat.lastMessage.createdAt) : '';
@@ -219,8 +259,9 @@ function renderChatList() {
     const bottom = document.createElement('div');
     bottom.className = 'chat-item-bottom';
     const preview = document.createElement('div');
-    preview.className = 'chat-item-preview';
-    preview.textContent = state.typingPeers.has(chat.peer.id) ? 'schreibt…' : previewText(chat);
+    const pv = previewText(chat);
+    preview.className = 'chat-item-preview' + (pv.typing ? ' typing' : '');
+    preview.textContent = pv.text;
     bottom.appendChild(preview);
     if (chat.unread > 0) {
       const badge = document.createElement('div');
@@ -231,24 +272,23 @@ function renderChatList() {
 
     main.append(top, bottom);
     item.append(avatarWrap, main);
-    item.addEventListener('click', () => openChat(chat.peer));
+    item.addEventListener('click', () => openChat(chat.id));
     chatListEl.appendChild(item);
   }
 }
 
-// ---------------------------------------------------------------- Chatansicht
+// ---------------------------------------------------------------- Konversation
 
-async function openChat(peer) {
-  state.activePeer = peer;
+async function openChat(conversationId) {
+  const data = await api(`/api/conversations/${conversationId}/messages`);
+  state.activeConv = data.conversation;
+  state.messages = data.messages;
+
   $('chat-placeholder').classList.add('hidden');
   $('chat-active').classList.remove('hidden');
-  $('chat-pane').classList.remove('no-chat');
   appView.classList.add('mobile-chat-open');
 
-  const data = await api(`/api/messages/${peer.id}`);
-  state.activePeer = data.peer;
-  state.messages = data.messages;
-  renderPeerHeader(data.online);
+  renderPeerHeader();
   renderMessages();
   markRead();
   renderChatList();
@@ -256,7 +296,7 @@ async function openChat(peer) {
 }
 
 function closeChat() {
-  state.activePeer = null;
+  state.activeConv = null;
   state.messages = [];
   appView.classList.remove('mobile-chat-open');
   $('chat-active').classList.add('hidden');
@@ -264,38 +304,52 @@ function closeChat() {
   renderChatList();
 }
 
-function renderPeerHeader(online) {
-  const peer = state.activePeer;
-  $('peer-avatar').textContent = initials(peer.displayName);
-  $('peer-name').textContent = peer.displayName;
-  updatePeerStatus(online);
+function renderPeerHeader() {
+  const conv = state.activeConv;
+  if (!conv) return;
+  paintChatAvatar($('peer-avatar'), conv);
+  $('peer-name').textContent = conv.title;
+  $('btn-add-member').classList.toggle('hidden', conv.type !== 'group');
+  updatePeerStatus();
 }
 
-function updatePeerStatus(online) {
+function updatePeerStatus() {
+  const conv = state.activeConv;
+  if (!conv) return;
   const el = $('peer-status');
-  const peer = state.activePeer;
-  if (!peer) return;
-  if (state.typingPeers.has(peer.id)) {
-    el.textContent = 'schreibt…';
+  const names = typingNames(conv.id);
+  if (names.length) {
+    el.textContent = conv.type === 'group' ? `${names.join(', ')} schreibt …` : 'schreibt …';
     el.className = 'peer-status typing';
-  } else if (online) {
+  } else if (conv.type === 'group') {
+    const others = conv.members.filter((m) => m.id !== state.me.id);
+    el.textContent = ['Du', ...others.map((m) => m.displayName)].join(', ');
+    el.className = 'peer-status';
+  } else if (conv.online) {
     el.textContent = 'online';
     el.className = 'peer-status online';
   } else {
-    el.textContent = `@${peer.username} · ${langLabel(peer.language)}`;
+    const peer = conv.members.find((m) => m.id !== state.me.id);
+    el.textContent = peer ? langLabel(peer.language) : '';
     el.className = 'peer-status';
   }
 }
 
-function tickState(msg) {
-  if (msg.readAt) return { text: '✓✓', cls: 'ticks read' };
-  if (msg.deliveredAt) return { text: '✓✓', cls: 'ticks' };
-  return { text: '✓', cls: 'ticks' };
-}
+const STATUS_LABEL = { sent: 'Gesendet', delivered: 'Zugestellt', read: 'Gelesen' };
 
-function buildBubble(msg) {
+function buildBubble(msg, opts = {}) {
+  const fragment = document.createDocumentFragment();
+
+  if (state.activeConv?.type === 'group' && !msg.outgoing && msg.senderName && opts.showSender) {
+    const sender = document.createElement('div');
+    sender.className = 'sender-name';
+    sender.textContent = msg.senderName;
+    fragment.appendChild(sender);
+  }
+
   const bubble = document.createElement('div');
   bubble.className = 'bubble ' + (msg.outgoing ? 'out' : 'in');
+  if (opts.animate) bubble.classList.add(msg.outgoing ? 'anim-out' : 'anim-in');
   bubble.dataset.messageId = msg.id;
 
   const showTranslation = !msg.outgoing && msg.translation && msg.translation.translated;
@@ -303,48 +357,45 @@ function buildBubble(msg) {
   mainText.textContent = showTranslation ? msg.translation.text : msg.original.text;
   bubble.appendChild(mainText);
 
-  const meta = document.createElement('span');
-  meta.className = 'bubble-meta';
   const time = document.createElement('span');
+  time.className = 'bubble-time';
   time.textContent = formatTime(msg.createdAt);
-  meta.appendChild(time);
-  if (msg.outgoing) {
-    const t = tickState(msg);
-    const ticks = document.createElement('span');
-    ticks.className = t.cls;
-    ticks.textContent = t.text;
-    meta.appendChild(ticks);
-  }
-  bubble.appendChild(meta);
+  bubble.appendChild(time);
 
   if (showTranslation) {
     const toggle = document.createElement('button');
     toggle.type = 'button';
     toggle.className = 'original-toggle';
-    toggle.textContent = `🌐 Original anzeigen (${langLabel(msg.original.lang)})`;
+    toggle.innerHTML =
+      '<svg width="13" height="13" aria-hidden="true"><use href="#i-globe"/></svg>' +
+      `<span>Original (${langLabel(msg.original.lang)})</span>`;
     const original = document.createElement('div');
     original.className = 'original-text hidden';
     original.textContent = msg.original.text;
     toggle.addEventListener('click', () => {
       const nowHidden = original.classList.toggle('hidden');
-      toggle.textContent = nowHidden
-        ? `🌐 Original anzeigen (${langLabel(msg.original.lang)})`
-        : '🌐 Original ausblenden';
+      toggle.querySelector('span').textContent = nowHidden
+        ? `Original (${langLabel(msg.original.lang)})`
+        : 'Original ausblenden';
     });
     bubble.append(toggle, original);
   } else if (!msg.outgoing && msg.translation && msg.translation.failed) {
     const note = document.createElement('span');
     note.className = 'translate-failed';
-    note.textContent = '⚠️ Übersetzung derzeit nicht möglich – Originaltext angezeigt.';
+    note.textContent = 'Übersetzung derzeit nicht möglich – Originaltext angezeigt.';
     bubble.appendChild(note);
   }
 
-  return bubble;
+  fragment.appendChild(bubble);
+  return fragment;
 }
 
+// Status („Zugestellt" / „Gelesen") nur unter der letzten eigenen Nachricht,
+// wie in Apples Nachrichten-App.
 function renderMessages() {
   messagesEl.innerHTML = '';
   let lastDay = '';
+  let prevSender = null;
   for (const msg of state.messages) {
     const day = formatDay(msg.createdAt);
     if (day !== lastDay) {
@@ -353,65 +404,102 @@ function renderMessages() {
       divider.textContent = day;
       messagesEl.appendChild(divider);
       lastDay = day;
+      prevSender = null;
     }
-    messagesEl.appendChild(buildBubble(msg));
+    messagesEl.appendChild(buildBubble(msg, { showSender: msg.senderId !== prevSender }));
+    prevSender = msg.senderId;
   }
+  appendStatusRow();
+  renderTypingRow();
   messagesEl.scrollTop = messagesEl.scrollHeight;
 }
 
-function updateTicks() {
-  for (const msg of state.messages) {
-    if (!msg.outgoing) continue;
-    const bubble = messagesEl.querySelector(`[data-message-id="${msg.id}"] .ticks`);
-    if (!bubble) continue;
-    const t = tickState(msg);
-    bubble.className = t.cls;
-    bubble.textContent = t.text;
+function appendStatusRow() {
+  messagesEl.querySelector('.message-status')?.remove();
+  const lastOut = [...state.messages].reverse().find((m) => m.outgoing);
+  if (!lastOut || !lastOut.status) return;
+  const lastMsg = state.messages[state.messages.length - 1];
+  if (lastMsg.id !== lastOut.id) return;
+  const el = document.createElement('div');
+  el.className = 'message-status';
+  el.textContent = STATUS_LABEL[lastOut.status] || '';
+  messagesEl.appendChild(el);
+}
+
+function renderTypingRow() {
+  messagesEl.querySelector('.typing-row')?.remove();
+  if (!state.activeConv || typingNames(state.activeConv.id).length === 0) return;
+  const row = document.createElement('div');
+  row.className = 'typing-row';
+  row.setAttribute('aria-label', 'schreibt gerade');
+  for (let i = 0; i < 3; i++) {
+    const dot = document.createElement('span');
+    dot.className = 'dot';
+    row.appendChild(dot);
   }
+  messagesEl.appendChild(row);
+  messagesEl.scrollTop = messagesEl.scrollHeight;
+}
+
+// Beim Live-Anhängen sicherstellen, dass der Tages-Divider existiert.
+function ensureDayDivider(msg) {
+  const day = formatDay(msg.createdAt);
+  const dividers = messagesEl.querySelectorAll('.day-divider');
+  const last = dividers[dividers.length - 1];
+  if (last && last.textContent === day) return;
+  const divider = document.createElement('div');
+  divider.className = 'day-divider';
+  divider.textContent = day;
+  messagesEl.appendChild(divider);
 }
 
 function markRead() {
-  if (!state.activePeer || !state.socket) return;
-  state.socket.emit('messages:read', { peerId: state.activePeer.id });
-  const chat = state.chats.find((c) => c.peer.id === state.activePeer.id);
+  if (!state.activeConv || !state.socket) return;
+  state.socket.emit('messages:read', { conversationId: state.activeConv.id });
+  const chat = state.chats.find((c) => c.id === state.activeConv.id);
   if (chat) chat.unread = 0;
 }
 
 // -------------------------------------------------------------------- Senden
 
-$('composer').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const input = $('message-input');
-  const text = input.value.trim();
-  if (!text || !state.activePeer || !state.socket) return;
-  input.value = '';
-  stopTyping();
-
-  state.socket.emit('message:send', { to: state.activePeer.id, text }, (res) => {
-    if (res?.error || !res?.message) return;
-    state.messages.push(res.message);
-    messagesEl.appendChild(buildBubble(res.message));
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-    loadChats();
-  });
-});
-
-function stopTyping() {
-  clearTimeout(state.typingTimer);
-  if (state.isTypingSent && state.activePeer && state.socket) {
-    state.socket.emit('typing', { to: state.activePeer.id, isTyping: false });
-  }
-  state.isTypingSent = false;
-}
-
 $('message-input').addEventListener('input', () => {
-  if (!state.activePeer || !state.socket) return;
+  $('send-btn').disabled = $('message-input').value.trim() === '';
+  if (!state.activeConv || !state.socket) return;
   if (!state.isTypingSent) {
-    state.socket.emit('typing', { to: state.activePeer.id, isTyping: true });
+    state.socket.emit('typing', { conversationId: state.activeConv.id, isTyping: true });
     state.isTypingSent = true;
   }
   clearTimeout(state.typingTimer);
   state.typingTimer = setTimeout(stopTyping, 2500);
+});
+
+function stopTyping() {
+  clearTimeout(state.typingTimer);
+  if (state.isTypingSent && state.activeConv && state.socket) {
+    state.socket.emit('typing', { conversationId: state.activeConv.id, isTyping: false });
+  }
+  state.isTypingSent = false;
+}
+
+$('composer').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const input = $('message-input');
+  const text = input.value.trim();
+  if (!text || !state.activeConv || !state.socket) return;
+  input.value = '';
+  $('send-btn').disabled = true;
+  stopTyping();
+
+  state.socket.emit('message:send', { conversationId: state.activeConv.id, text }, (res) => {
+    if (res?.error || !res?.message) return;
+    state.messages.push(res.message);
+    messagesEl.querySelector('.message-status')?.remove();
+    ensureDayDivider(res.message);
+    messagesEl.appendChild(buildBubble(res.message, { animate: true }));
+    appendStatusRow();
+    messagesEl.scrollTop = messagesEl.scrollHeight;
+    loadChats();
+  });
 });
 
 // ------------------------------------------------------------------ Socket.IO
@@ -420,46 +508,71 @@ function connectSocket() {
   state.socket = io({ auth: { token: state.token } });
 
   state.socket.on('message:new', ({ message }) => {
-    const peerId = message.outgoing ? message.recipientId : message.senderId;
-    if (state.activePeer && peerId === state.activePeer.id) {
+    if (state.activeConv && message.conversationId === state.activeConv.id) {
+      // Race zwischen Verlauf-Laden und Live-Event: nie doppelt rendern.
+      if (state.messages.some((m) => m.id === message.id)) return;
       state.messages.push(message);
-      messagesEl.appendChild(buildBubble(message));
+      const prev = state.messages[state.messages.length - 2];
+      messagesEl.querySelector('.message-status')?.remove();
+      messagesEl.querySelector('.typing-row')?.remove();
+      ensureDayDivider(message);
+      messagesEl.appendChild(buildBubble(message, {
+        animate: true,
+        showSender: !prev || prev.senderId !== message.senderId,
+      }));
+      appendStatusRow();
+      renderTypingRow();
       messagesEl.scrollTop = messagesEl.scrollHeight;
       if (!message.outgoing) markRead();
     }
     loadChats();
   });
 
-  state.socket.on('message:status', ({ peerId, status, ids }) => {
-    if (!state.activePeer || peerId !== state.activePeer.id) return;
-    const now = Date.now();
+  state.socket.on('conversation:status', ({ conversationId, deliveredUpTo, readUpTo }) => {
+    if (!state.activeConv || conversationId !== state.activeConv.id) return;
+    let changed = false;
     for (const msg of state.messages) {
       if (!msg.outgoing) continue;
-      if (ids && !ids.includes(msg.id)) continue;
-      if (status === 'delivered' && !msg.deliveredAt) msg.deliveredAt = now;
-      if (status === 'read') {
-        msg.deliveredAt = msg.deliveredAt || now;
-        msg.readAt = msg.readAt || now;
+      const next = readUpTo >= msg.id ? 'read' : deliveredUpTo >= msg.id ? 'delivered' : 'sent';
+      if (next !== msg.status) {
+        msg.status = next;
+        changed = true;
       }
     }
-    updateTicks();
+    if (changed) appendStatusRow();
   });
 
-  state.socket.on('typing', ({ from, isTyping }) => {
-    if (isTyping) state.typingPeers.add(from);
-    else state.typingPeers.delete(from);
-    if (state.activePeer && from === state.activePeer.id) {
-      updatePeerStatus(state.chats.find((c) => c.peer.id === from)?.online);
+  state.socket.on('typing', ({ conversationId, userId, name, isTyping }) => {
+    let byUser = state.typing.get(conversationId);
+    if (!byUser) state.typing.set(conversationId, (byUser = new Map()));
+    if (isTyping) byUser.set(userId, name);
+    else byUser.delete(userId);
+    if (state.activeConv && conversationId === state.activeConv.id) {
+      updatePeerStatus();
+      renderTypingRow();
     }
     renderChatList();
   });
 
   state.socket.on('presence', ({ userId, online }) => {
-    const chat = state.chats.find((c) => c.peer.id === userId);
-    if (chat) chat.online = online;
-    if (!online) state.typingPeers.delete(userId);
-    if (state.activePeer && userId === state.activePeer.id) updatePeerStatus(online);
+    for (const chat of state.chats) {
+      if (chat.type === 'direct' && chat.peerId === userId) chat.online = online;
+    }
+    if (!online) {
+      for (const byUser of state.typing.values()) byUser.delete(userId);
+    }
+    if (state.activeConv) {
+      const fresh = state.chats.find((c) => c.id === state.activeConv.id);
+      if (fresh) state.activeConv.online = fresh.online;
+      updatePeerStatus();
+    }
     renderChatList();
+  });
+
+  state.socket.on('conversation:new', () => loadChats());
+  state.socket.on('conversation:changed', async ({ conversationId }) => {
+    await loadChats();
+    if (state.activeConv && conversationId === state.activeConv.id) openChat(conversationId);
   });
 
   state.socket.on('connect_error', (err) => {
@@ -467,67 +580,263 @@ function connectSocket() {
   });
 }
 
-// ----------------------------------------------------------- Modale & Aktionen
+// ----------------------------------------------------------------- Sheets
 
-$('btn-back').addEventListener('click', closeChat);
-$('btn-logout').addEventListener('click', logout);
+function openSheet(id) { $(id).classList.remove('hidden'); }
+function closeSheet(id) { $(id).classList.add('hidden'); }
 
-for (const backdrop of document.querySelectorAll('.modal-backdrop')) {
+for (const backdrop of document.querySelectorAll('.sheet-backdrop')) {
   backdrop.addEventListener('click', (e) => {
-    if (e.target === backdrop || e.target.classList.contains('modal-close')) {
+    if (e.target === backdrop || e.target.closest('.sheet-close')) {
       backdrop.classList.add('hidden');
     }
   });
 }
 
-$('btn-new-chat').addEventListener('click', () => {
-  $('modal-new-chat').classList.remove('hidden');
-  $('user-search').value = '';
-  $('user-results').innerHTML = '';
-  $('user-search').focus();
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    for (const b of document.querySelectorAll('.sheet-backdrop')) b.classList.add('hidden');
+  }
 });
 
-let searchTimer = null;
-$('user-search').addEventListener('input', () => {
-  clearTimeout(searchTimer);
-  searchTimer = setTimeout(async () => {
-    const q = $('user-search').value.trim();
-    const resultsEl = $('user-results');
-    if (q.length < 2) { resultsEl.innerHTML = ''; return; }
-    const data = await api(`/api/users?q=${encodeURIComponent(q)}`);
-    resultsEl.innerHTML = '';
-    if (data.users.length === 0) {
-      resultsEl.innerHTML = '<div class="user-result-sub" style="padding:8px">Niemanden gefunden.</div>';
-      return;
-    }
-    for (const user of data.users) {
-      const row = document.createElement('div');
-      row.className = 'user-result';
-      const avatar = document.createElement('div');
+$('btn-back').addEventListener('click', closeChat);
+$('btn-logout').addEventListener('click', logout);
+
+// --- Neuer Chat ---
+
+function resetNewChatSheet() {
+  $('direct-code').value = '';
+  $('direct-error').textContent = '';
+  $('direct-result').classList.add('hidden');
+  $('btn-start-direct').disabled = true;
+  state.directPeer = null;
+  $('group-name').value = '';
+  $('group-code').value = '';
+  $('group-error').textContent = '';
+  state.groupDraft = [];
+  renderGroupDraft();
+  updateGroupButton();
+}
+
+function showNewChat() {
+  resetNewChatSheet();
+  openSheet('sheet-new-chat');
+  $('direct-code').focus();
+}
+
+$('btn-new-chat').addEventListener('click', showNewChat);
+$('btn-empty-new').addEventListener('click', showNewChat);
+
+$('tab-direct').addEventListener('click', () => setNewChatTab('direct'));
+$('tab-group').addEventListener('click', () => setNewChatTab('group'));
+
+function setNewChatTab(tab) {
+  $('tab-direct').classList.toggle('active', tab === 'direct');
+  $('tab-group').classList.toggle('active', tab === 'group');
+  $('new-direct').classList.toggle('hidden', tab !== 'direct');
+  $('new-group').classList.toggle('hidden', tab !== 'group');
+  ($(tab === 'direct' ? 'direct-code' : 'group-name')).focus();
+}
+
+function formatCodeInput(input) {
+  const raw = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
+  input.value = raw.length > 4 ? `${raw.slice(0, 4)}-${raw.slice(4)}` : raw;
+  return raw.length === 8;
+}
+
+async function lookupCode(code) {
+  const data = await api('/api/contacts/lookup', {
+    method: 'POST',
+    body: JSON.stringify({ code }),
+  });
+  return data.user;
+}
+
+let directLookupTimer = null;
+$('direct-code').addEventListener('input', () => {
+  const complete = formatCodeInput($('direct-code'));
+  $('direct-error').textContent = '';
+  $('direct-result').classList.add('hidden');
+  $('btn-start-direct').disabled = true;
+  state.directPeer = null;
+  clearTimeout(directLookupTimer);
+  if (!complete) return;
+  directLookupTimer = setTimeout(async () => {
+    try {
+      const user = await lookupCode($('direct-code').value);
+      state.directPeer = user;
+      const box = $('direct-result');
+      box.innerHTML = '';
+      const avatar = document.createElement('span');
       avatar.className = 'avatar';
-      avatar.textContent = initials(user.displayName);
+      paintAvatar(avatar, user.displayName, `user:${user.id}`);
       const info = document.createElement('div');
       const name = document.createElement('div');
-      name.className = 'user-result-name';
+      name.className = 'lookup-name';
       name.textContent = user.displayName;
       const sub = document.createElement('div');
-      sub.className = 'user-result-sub';
+      sub.className = 'lookup-sub';
       sub.textContent = `@${user.username} · ${langLabel(user.language)}`;
       info.append(name, sub);
-      row.append(avatar, info);
-      row.addEventListener('click', () => {
-        $('modal-new-chat').classList.add('hidden');
-        openChat(user);
-      });
-      resultsEl.appendChild(row);
+      box.append(avatar, info);
+      box.classList.remove('hidden');
+      $('btn-start-direct').disabled = false;
+    } catch {
+      $('direct-error').textContent = 'Keine Person mit dieser ID gefunden.';
     }
   }, 250);
 });
 
+$('btn-start-direct').addEventListener('click', async () => {
+  if (!state.directPeer) return;
+  const data = await api('/api/conversations', {
+    method: 'POST',
+    body: JSON.stringify({ type: 'direct', code: $('direct-code').value }),
+  });
+  closeSheet('sheet-new-chat');
+  await loadChats();
+  openChat(data.conversation.id);
+});
+
+// --- Gruppe ---
+
+function renderGroupDraft() {
+  const wrap = $('group-members');
+  wrap.innerHTML = '';
+  for (const member of state.groupDraft) {
+    const chip = document.createElement('span');
+    chip.className = 'member-chip';
+    const label = document.createElement('span');
+    label.textContent = member.displayName;
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.title = `${member.displayName} entfernen`;
+    remove.innerHTML = '<svg width="14" height="14" aria-hidden="true"><use href="#i-xmark"/></svg>';
+    remove.addEventListener('click', () => {
+      state.groupDraft = state.groupDraft.filter((m) => m.id !== member.id);
+      renderGroupDraft();
+      updateGroupButton();
+    });
+    chip.append(label, remove);
+    wrap.appendChild(chip);
+  }
+}
+
+function updateGroupButton() {
+  $('btn-create-group').disabled =
+    $('group-name').value.trim() === '' || state.groupDraft.length === 0;
+}
+
+$('group-name').addEventListener('input', updateGroupButton);
+$('group-code').addEventListener('input', () => {
+  formatCodeInput($('group-code'));
+  $('group-error').textContent = '';
+});
+
+async function addGroupMember() {
+  const input = $('group-code');
+  if (input.value.replace(/-/g, '').length !== 8) {
+    $('group-error').textContent = 'Bitte eine vollständige ID eingeben.';
+    return;
+  }
+  try {
+    const user = await lookupCode(input.value);
+    if (!state.groupDraft.some((m) => m.id === user.id)) {
+      state.groupDraft.push({ ...user, code: input.value });
+    }
+    input.value = '';
+    renderGroupDraft();
+    updateGroupButton();
+    input.focus();
+  } catch {
+    $('group-error').textContent = 'Keine Person mit dieser ID gefunden.';
+  }
+}
+
+$('btn-add-group-member').addEventListener('click', addGroupMember);
+$('group-code').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    addGroupMember();
+  }
+});
+
+$('btn-create-group').addEventListener('click', async () => {
+  try {
+    const data = await api('/api/conversations', {
+      method: 'POST',
+      body: JSON.stringify({
+        type: 'group',
+        name: $('group-name').value.trim(),
+        codes: state.groupDraft.map((m) => m.code),
+      }),
+    });
+    closeSheet('sheet-new-chat');
+    await loadChats();
+    openChat(data.conversation.id);
+  } catch {
+    $('group-error').textContent = 'Gruppe konnte nicht erstellt werden.';
+  }
+});
+
+// --- Mitglied zur Gruppe hinzufügen ---
+
+$('btn-add-member').addEventListener('click', () => {
+  $('add-member-code').value = '';
+  $('add-member-error').textContent = '';
+  $('btn-confirm-add-member').disabled = true;
+  openSheet('sheet-add-member');
+  $('add-member-code').focus();
+});
+
+$('add-member-code').addEventListener('input', () => {
+  const complete = formatCodeInput($('add-member-code'));
+  $('add-member-error').textContent = '';
+  $('btn-confirm-add-member').disabled = !complete;
+});
+
+$('btn-confirm-add-member').addEventListener('click', async () => {
+  try {
+    await api(`/api/conversations/${state.activeConv.id}/members`, {
+      method: 'POST',
+      body: JSON.stringify({ code: $('add-member-code').value }),
+    });
+    closeSheet('sheet-add-member');
+    await loadChats();
+    openChat(state.activeConv.id);
+  } catch {
+    $('add-member-error').textContent = 'Keine Person mit dieser ID gefunden.';
+  }
+});
+
+// --- Einstellungen ---
+
 $('btn-settings').addEventListener('click', () => {
+  paintAvatar($('settings-avatar'), state.me.displayName, `user:${state.me.id}`);
+  $('settings-name-preview').textContent = state.me.displayName;
+  $('settings-username').textContent = `@${state.me.username}`;
+  $('settings-code').textContent = state.me.userCode || '';
   $('settings-displayname').value = state.me.displayName;
   fillLanguageSelect($('settings-language'), state.me.language);
-  $('modal-settings').classList.remove('hidden');
+  $('copy-label').textContent = 'Kopieren';
+  openSheet('sheet-settings');
+});
+
+$('btn-copy-code').addEventListener('click', async () => {
+  const code = state.me.userCode || '';
+  try {
+    await navigator.clipboard.writeText(code);
+  } catch {
+    const range = document.createRange();
+    range.selectNodeContents($('settings-code'));
+    const selection = getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+    document.execCommand('copy');
+    selection.removeAllRanges();
+  }
+  $('copy-label').textContent = 'Kopiert';
+  setTimeout(() => { $('copy-label').textContent = 'Kopieren'; }, 1600);
 });
 
 $('settings-save').addEventListener('click', async () => {
@@ -540,10 +849,10 @@ $('settings-save').addEventListener('click', async () => {
   });
   state.me = data.user;
   renderMe();
-  $('modal-settings').classList.add('hidden');
-  // Chatliste und offenen Chat in der neuen Sprache neu laden.
+  closeSheet('sheet-settings');
+  // Chatliste und offene Konversation in der neuen Sprache neu laden.
   await loadChats();
-  if (state.activePeer) openChat(state.activePeer);
+  if (state.activeConv) openChat(state.activeConv.id);
 });
 
 // ----------------------------------------------------------------------- Init

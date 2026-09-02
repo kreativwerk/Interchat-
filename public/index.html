@@ -3,34 +3,95 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <meta name="theme-color" content="#008069">
-  <title>InterChat – Chatten ohne Sprachbarriere</title>
+  <meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)">
+  <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
+  <title>InterChat</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
+  <!-- SF-Symbols-artige Icons: ein Strichgewicht, eine Sprache -->
+  <svg hidden aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+    <symbol id="i-compose" viewBox="0 0 24 24">
+      <path d="M11 5H6.5A2.5 2.5 0 0 0 4 7.5v10A2.5 2.5 0 0 0 6.5 20h10a2.5 2.5 0 0 0 2.5-2.5V13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+      <path d="M17.8 4.2a1.9 1.9 0 0 1 2.7 2.7l-7.6 7.6-3.4.7.7-3.4z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="3.2" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M12 3.2v2.2M12 18.6v2.2M20.8 12h-2.2M5.4 12H3.2M18.2 5.8l-1.6 1.6M7.4 16.6l-1.6 1.6M18.2 18.2l-1.6-1.6M7.4 7.4 5.8 5.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-chevron-left" viewBox="0 0 24 24">
+      <path d="m14.5 5.5-6.5 6.5 6.5 6.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="i-chevron-down" viewBox="0 0 24 24">
+      <path d="m6 9.5 6 6 6-6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="i-arrow-up" viewBox="0 0 24 24">
+      <path d="M12 19V6M6.5 11 12 5.5 17.5 11" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="i-globe" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" stroke-width="1.6"/>
+      <path d="M3.8 12h16.4M12 3.8c-2.5 2.3-3.8 5.1-3.8 8.2s1.3 5.9 3.8 8.2c2.5-2.3 3.8-5.1 3.8-8.2S14.5 6.1 12 3.8Z" fill="none" stroke="currentColor" stroke-width="1.6"/>
+    </symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24">
+      <rect x="8.5" y="8.5" width="11" height="11" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M15.5 5.5v-.8A1.7 1.7 0 0 0 13.8 3H6.2A1.7 1.7 0 0 0 4.5 4.7v7.6a1.7 1.7 0 0 0 1.7 1.7h.8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" transform="translate(0,1)"/>
+    </symbol>
+    <symbol id="i-check" viewBox="0 0 24 24">
+      <path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+    </symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24">
+      <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-xmark" viewBox="0 0 24 24">
+      <path d="m6.5 6.5 11 11m0-11-11 11" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-person" viewBox="0 0 24 24">
+      <circle cx="12" cy="8.2" r="3.6" fill="none" stroke="currentColor" stroke-width="1.8"/>
+      <path d="M4.8 19.5c1.3-3 4-4.6 7.2-4.6s5.9 1.6 7.2 4.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-people" viewBox="0 0 24 24">
+      <circle cx="9" cy="8.8" r="3.1" fill="none" stroke="currentColor" stroke-width="1.7"/>
+      <path d="M3.2 19c1.1-2.6 3.2-4 5.8-4s4.7 1.4 5.8 4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+      <path d="M15.2 6.2a3.1 3.1 0 1 1 1.6 5.9M17.4 15.3c1.8.4 3.1 1.6 3.9 3.4" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/>
+    </symbol>
+    <symbol id="i-bubbles" viewBox="0 0 24 24">
+      <path d="M8.6 17.2 5 19v-3.4A6.7 6.7 0 0 1 3 11c0-3.9 3.4-7 7.5-7 3.5 0 6.4 2.2 7.3 5.2" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M13.5 20.5c.9.4 1.9.5 3 .5l3.5 1.5-.8-3A4.8 4.8 0 0 0 21 16c0-2.8-2.4-5-5.2-5s-5.3 2.2-5.3 5c0 2.1 1.2 3.7 3 4.5Z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/>
+    </symbol>
+  </svg>
+
   <!-- Anmeldung / Registrierung -->
   <div id="auth-view" class="auth-view hidden">
     <div class="auth-card">
-      <div class="auth-logo">💬</div>
+      <div class="app-icon" aria-hidden="true">
+        <svg width="42" height="42"><use href="#i-bubbles"/></svg>
+      </div>
       <h1>InterChat</h1>
-      <p class="auth-tagline">Du schreibst in deiner Sprache – dein Gegenüber liest in seiner.</p>
+      <p class="auth-tagline">Du schreibst in deiner Sprache.<br>Dein Gegenüber liest in seiner.</p>
 
-      <div class="auth-tabs">
-        <button id="tab-login" class="auth-tab active" type="button">Anmelden</button>
-        <button id="tab-register" class="auth-tab" type="button">Registrieren</button>
+      <div class="segmented" role="tablist" aria-label="Anmeldung oder Registrierung">
+        <button id="tab-login" class="segment active" type="button" role="tab" aria-selected="true">Anmelden</button>
+        <button id="tab-register" class="segment" type="button" role="tab" aria-selected="false">Registrieren</button>
       </div>
 
       <form id="auth-form" autocomplete="on">
-        <input id="auth-username" type="text" placeholder="Benutzername" autocomplete="username" required>
-        <input id="auth-password" type="password" placeholder="Passwort (mind. 6 Zeichen)" autocomplete="current-password" required>
-        <div id="register-fields" class="hidden">
-          <input id="auth-displayname" type="text" placeholder="Anzeigename (optional)">
-          <label class="lang-label" for="auth-language">Meine Sprache</label>
-          <select id="auth-language"></select>
+        <div class="grouped">
+          <input id="auth-username" type="text" placeholder="Benutzername" autocomplete="username" required>
+          <input id="auth-password" type="password" placeholder="Passwort (mind. 6 Zeichen)" autocomplete="current-password" required>
+          <div id="register-fields" class="hidden">
+            <input id="auth-displayname" type="text" placeholder="Anzeigename (optional)">
+            <div class="select-row">
+              <label for="auth-language">Meine Sprache</label>
+              <div class="select-wrap">
+                <select id="auth-language"></select>
+                <svg class="select-chevron" width="16" height="16" aria-hidden="true"><use href="#i-chevron-down"/></svg>
+              </div>
+            </div>
+          </div>
         </div>
-        <button id="auth-submit" class="btn-primary" type="submit">Anmelden</button>
-        <p id="auth-error" class="auth-error"></p>
+        <button id="auth-submit" class="btn-filled" type="submit">Anmelden</button>
+        <p id="auth-error" class="auth-error" role="alert"></p>
       </form>
     </div>
   </div>
@@ -40,73 +101,168 @@
     <!-- Seitenleiste: Chatliste -->
     <aside id="sidebar" class="sidebar">
       <header class="sidebar-header">
-        <div class="me">
-          <div id="me-avatar" class="avatar"></div>
-          <div class="me-info">
-            <div id="me-name" class="me-name"></div>
-            <div id="me-lang" class="me-lang"></div>
-          </div>
+        <div class="sidebar-bar">
+          <button id="btn-settings" class="avatar-btn" type="button" title="Einstellungen">
+            <span id="me-avatar" class="avatar avatar-small"></span>
+          </button>
+          <button id="btn-new-chat" class="icon-btn accent" type="button" title="Neuer Chat">
+            <svg width="22" height="22"><use href="#i-compose"/></svg>
+          </button>
         </div>
-        <div class="sidebar-actions">
-          <button id="btn-new-chat" class="icon-btn" title="Neuer Chat" type="button">✏️</button>
-          <button id="btn-settings" class="icon-btn" title="Einstellungen" type="button">⚙️</button>
-        </div>
+        <h1 class="large-title">Chats</h1>
       </header>
-      <div id="chat-list" class="chat-list">
-        <div class="empty-hint" id="chat-list-empty">
-          Noch keine Chats.<br>Starte mit ✏️ einen neuen Chat.
-        </div>
+      <div id="chat-list" class="chat-list"></div>
+      <div id="chat-list-empty" class="empty-state hidden">
+        <svg width="44" height="44" aria-hidden="true"><use href="#i-bubbles"/></svg>
+        <p>Noch keine Chats.</p>
+        <button id="btn-empty-new" class="btn-tinted" type="button">Neuen Chat starten</button>
       </div>
     </aside>
 
-    <!-- Chatbereich -->
-    <main id="chat-pane" class="chat-pane no-chat">
+    <!-- Konversation -->
+    <main id="chat-pane" class="chat-pane">
       <div id="chat-placeholder" class="chat-placeholder">
-        <div class="placeholder-logo">🌍</div>
+        <div class="app-icon" aria-hidden="true">
+          <svg width="42" height="42"><use href="#i-bubbles"/></svg>
+        </div>
         <h2>InterChat</h2>
-        <p>Nachrichten werden automatisch in die Sprache des Empfängers übersetzt.</p>
+        <p>Wähle einen Chat – jede Nachricht kommt automatisch in deiner Sprache an.</p>
       </div>
 
       <div id="chat-active" class="chat-active hidden">
         <header class="chat-header">
-          <button id="btn-back" class="icon-btn back-btn" type="button">←</button>
+          <button id="btn-back" class="icon-btn accent back-btn" type="button" title="Zurück">
+            <svg width="24" height="24"><use href="#i-chevron-left"/></svg>
+          </button>
           <div id="peer-avatar" class="avatar"></div>
           <div class="peer-info">
             <div id="peer-name" class="peer-name"></div>
             <div id="peer-status" class="peer-status"></div>
           </div>
+          <button id="btn-add-member" class="icon-btn accent hidden" type="button" title="Mitglied hinzufügen">
+            <svg width="22" height="22"><use href="#i-person"/></svg>
+          </button>
         </header>
         <div id="messages" class="messages"></div>
         <form id="composer" class="composer">
-          <input id="message-input" type="text" placeholder="Nachricht schreiben…" autocomplete="off" maxlength="4000">
-          <button class="send-btn" type="submit" title="Senden">➤</button>
+          <input id="message-input" type="text" placeholder="Nachricht" autocomplete="off" maxlength="4000">
+          <button id="send-btn" class="send-btn" type="submit" title="Senden" disabled>
+            <svg width="18" height="18"><use href="#i-arrow-up"/></svg>
+          </button>
         </form>
       </div>
     </main>
   </div>
 
-  <!-- Neuer Chat -->
-  <div id="modal-new-chat" class="modal-backdrop hidden">
-    <div class="modal">
-      <h3>Neuer Chat</h3>
-      <input id="user-search" type="text" placeholder="Benutzername suchen…" autocomplete="off">
-      <div id="user-results" class="user-results"></div>
-      <button class="btn-secondary modal-close" type="button">Schließen</button>
+  <!-- Sheet: Neuer Chat -->
+  <div id="sheet-new-chat" class="sheet-backdrop hidden">
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="new-chat-title">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <div class="sheet-head">
+        <h3 id="new-chat-title">Neuer Chat</h3>
+        <button class="icon-btn sheet-close" type="button" title="Schließen">
+          <svg width="20" height="20"><use href="#i-xmark"/></svg>
+        </button>
+      </div>
+
+      <div class="segmented">
+        <button id="tab-direct" class="segment active" type="button">Direkt</button>
+        <button id="tab-group" class="segment" type="button">Gruppe</button>
+      </div>
+
+      <div id="new-direct">
+        <p class="sheet-hint">Gib die InterChat-ID deines Kontakts ein. Jeder findet seine eigene ID in den Einstellungen.</p>
+        <div class="grouped">
+          <input id="direct-code" type="text" placeholder="z. B. AB2C-3DEF" autocomplete="off" spellcheck="false" maxlength="9">
+        </div>
+        <div id="direct-result" class="lookup-result hidden"></div>
+        <p id="direct-error" class="field-error" role="alert"></p>
+        <button id="btn-start-direct" class="btn-filled" type="button" disabled>Chat starten</button>
+      </div>
+
+      <div id="new-group" class="hidden">
+        <div class="grouped">
+          <input id="group-name" type="text" placeholder="Gruppenname" maxlength="64">
+        </div>
+        <p class="sheet-hint">Mitglieder über ihre InterChat-ID hinzufügen:</p>
+        <div class="code-add-row">
+          <div class="grouped grow">
+            <input id="group-code" type="text" placeholder="z. B. AB2C-3DEF" autocomplete="off" spellcheck="false" maxlength="9">
+          </div>
+          <button id="btn-add-group-member" class="icon-btn accent" type="button" title="Hinzufügen">
+            <svg width="22" height="22"><use href="#i-plus"/></svg>
+          </button>
+        </div>
+        <div id="group-members" class="member-chips"></div>
+        <p id="group-error" class="field-error" role="alert"></p>
+        <button id="btn-create-group" class="btn-filled" type="button" disabled>Gruppe erstellen</button>
+      </div>
     </div>
   </div>
 
-  <!-- Einstellungen -->
-  <div id="modal-settings" class="modal-backdrop hidden">
-    <div class="modal">
-      <h3>Einstellungen</h3>
-      <label class="lang-label" for="settings-displayname">Anzeigename</label>
-      <input id="settings-displayname" type="text" maxlength="48">
-      <label class="lang-label" for="settings-language">Meine Sprache</label>
-      <select id="settings-language"></select>
-      <p class="settings-hint">Neue eingehende Nachrichten werden in diese Sprache übersetzt.</p>
-      <button id="settings-save" class="btn-primary" type="button">Speichern</button>
-      <button id="btn-logout" class="btn-danger" type="button">Abmelden</button>
-      <button class="btn-secondary modal-close" type="button">Schließen</button>
+  <!-- Sheet: Mitglied hinzufügen -->
+  <div id="sheet-add-member" class="sheet-backdrop hidden">
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="add-member-title">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <div class="sheet-head">
+        <h3 id="add-member-title">Mitglied hinzufügen</h3>
+        <button class="icon-btn sheet-close" type="button" title="Schließen">
+          <svg width="20" height="20"><use href="#i-xmark"/></svg>
+        </button>
+      </div>
+      <div class="grouped">
+        <input id="add-member-code" type="text" placeholder="InterChat-ID" autocomplete="off" spellcheck="false" maxlength="9">
+      </div>
+      <p id="add-member-error" class="field-error" role="alert"></p>
+      <button id="btn-confirm-add-member" class="btn-filled" type="button" disabled>Hinzufügen</button>
+    </div>
+  </div>
+
+  <!-- Sheet: Einstellungen -->
+  <div id="sheet-settings" class="sheet-backdrop hidden">
+    <div class="sheet" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+      <div class="sheet-handle" aria-hidden="true"></div>
+      <div class="sheet-head">
+        <h3 id="settings-title">Einstellungen</h3>
+        <button class="icon-btn sheet-close" type="button" title="Schließen">
+          <svg width="20" height="20"><use href="#i-xmark"/></svg>
+        </button>
+      </div>
+
+      <div class="profile-row">
+        <span id="settings-avatar" class="avatar avatar-large"></span>
+        <div class="profile-info">
+          <div id="settings-name-preview" class="profile-name"></div>
+          <div id="settings-username" class="profile-username"></div>
+        </div>
+      </div>
+
+      <div class="id-card">
+        <div class="id-card-label">Meine InterChat-ID</div>
+        <div class="id-card-row">
+          <span id="settings-code" class="id-code"></span>
+          <button id="btn-copy-code" class="btn-tinted btn-compact" type="button">
+            <svg width="16" height="16" aria-hidden="true"><use href="#i-copy"/></svg>
+            <span id="copy-label">Kopieren</span>
+          </button>
+        </div>
+        <div class="id-card-hint">Teile diese ID – nur wer sie kennt, kann dir schreiben.</div>
+      </div>
+
+      <div class="grouped">
+        <input id="settings-displayname" type="text" placeholder="Anzeigename" maxlength="48">
+        <div class="select-row">
+          <label for="settings-language">Meine Sprache</label>
+          <div class="select-wrap">
+            <select id="settings-language"></select>
+            <svg class="select-chevron" width="16" height="16" aria-hidden="true"><use href="#i-chevron-down"/></svg>
+          </div>
+        </div>
+      </div>
+      <p class="sheet-hint">Eingehende Nachrichten werden in diese Sprache übersetzt.</p>
+
+      <button id="settings-save" class="btn-filled" type="button">Speichern</button>
+      <button id="btn-logout" class="btn-plain destructive" type="button">Abmelden</button>
     </div>
   </div>
 
