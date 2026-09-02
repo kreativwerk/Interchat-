@@ -2,3 +2,13 @@ node_modules/
 data/
 *.log
 .env
+
+# Skill-Installationen (per `npx skills add` lokal einrichten, nicht vendoren)
+.agents/
+.claude/skills/
+
+# Impeccable: Screenshots/Build-Artefakte bleiben lokal, Briefs werden committet
+.impeccable/review/
+.impeccable/build/
+.impeccable/mocks/
+.impeccable/config.local.json

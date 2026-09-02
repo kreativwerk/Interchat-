@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "gstack": {
+      "source": "garrytan/gstack",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "2a68bc531bb26c3e54c039f22eabeca9f2b3089039a7487fa6eb6fb0e668c28c"
+    },
+    "impeccable": {
+      "source": "pbakaus/impeccable",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/impeccable/SKILL.md",
+      "computedHash": "3203556b54ff0750270e891908c0c445a6fd7bb6e1afba411209a5bb0c3ae7f6"
+    }
+  }
+}
