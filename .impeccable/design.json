@@ -1,0 +1,184 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-09-02T00:00:00Z",
+  "title": "Design System: InterChat",
+  "extensions": {
+    "colorMeta": {
+      "system-blue": {
+        "role": "primary",
+        "displayName": "System-Blau",
+        "canonical": "#007aff",
+        "darkVariant": "#0a84ff",
+        "tonalRamp": ["oklch(25% 0.12 255)", "oklch(35% 0.16 255)", "oklch(45% 0.19 255)", "oklch(55% 0.21 255)", "oklch(62% 0.21 255)", "oklch(72% 0.16 255)", "oklch(84% 0.09 255)", "oklch(94% 0.03 255)"]
+      },
+      "system-blue-pressed": { "role": "primary", "displayName": "System-Blau gedrückt", "canonical": "#0062cc", "darkVariant": "#3395ff" },
+      "bubble-out-deep": { "role": "primary", "displayName": "Bubble-Tiefblau", "canonical": "#0f6fe0", "darkVariant": "#0967c8" },
+      "tint": { "role": "primary", "displayName": "Akzent-Tinte", "canonical": "rgba(0, 122, 255, 0.12)", "darkVariant": "rgba(10, 132, 255, 0.22)" },
+      "system-green-presence": {
+        "role": "semantic",
+        "displayName": "Präsenz-Grün",
+        "canonical": "#34c759",
+        "darkVariant": "#30d158",
+        "tonalRamp": ["oklch(25% 0.09 150)", "oklch(35% 0.13 150)", "oklch(45% 0.16 150)", "oklch(55% 0.19 150)", "oklch(70% 0.2 150)", "oklch(80% 0.16 150)", "oklch(88% 0.1 150)", "oklch(95% 0.04 150)"]
+      },
+      "destructive": {
+        "role": "semantic",
+        "displayName": "Destruktiv-Rot",
+        "canonical": "#e5271c",
+        "darkVariant": "#ff453a",
+        "tonalRamp": ["oklch(22% 0.1 28)", "oklch(32% 0.15 28)", "oklch(42% 0.18 28)", "oklch(52% 0.21 28)", "oklch(60% 0.22 28)", "oklch(72% 0.15 28)", "oklch(84% 0.08 28)", "oklch(94% 0.03 28)"]
+      },
+      "ground": { "role": "neutral", "displayName": "Grund (systemGray6)", "canonical": "#f2f2f7", "darkVariant": "#000000" },
+      "panel": { "role": "neutral", "displayName": "Panel", "canonical": "#ffffff", "darkVariant": "#1c1c1e" },
+      "panel-translucent": { "role": "neutral", "displayName": "Panel transluzent (Bar-Material)", "canonical": "rgba(249, 249, 249, 0.82)", "darkVariant": "rgba(22, 22, 24, 0.8)" },
+      "label": { "role": "neutral", "displayName": "Label", "canonical": "#000000", "darkVariant": "#ffffff" },
+      "secondary-label": { "role": "neutral", "displayName": "Sekundär-Label", "canonical": "#59595e", "darkVariant": "#aeaeb5" },
+      "tertiary-label": { "role": "neutral", "displayName": "Tertiär-Label", "canonical": "#86868b", "darkVariant": "#8e8e93" },
+      "separator": { "role": "neutral", "displayName": "Hairline-Separator", "canonical": "rgba(60, 60, 67, 0.29)", "darkVariant": "rgba(84, 84, 88, 0.65)" },
+      "fill": { "role": "neutral", "displayName": "Fill", "canonical": "rgba(120, 120, 128, 0.12)", "darkVariant": "rgba(120, 120, 128, 0.24)" },
+      "fill-strong": { "role": "neutral", "displayName": "Fill stark", "canonical": "rgba(120, 120, 128, 0.2)", "darkVariant": "rgba(120, 120, 128, 0.36)" },
+      "bubble-in": { "role": "neutral", "displayName": "Empfangene Bubble", "canonical": "#e9e9eb", "darkVariant": "#26262a" }
+    },
+    "typographyMeta": {
+      "large-title": { "displayName": "Large Title", "purpose": "Einmal pro Screen: „Chats“ über der Liste." },
+      "title": { "displayName": "Title", "purpose": "Sheet-Überschriften." },
+      "headline": { "displayName": "Headline", "purpose": "Chat-Namen, Peer-Name, Profilname." },
+      "body": { "displayName": "Body", "purpose": "Nachrichtentext, Eingaben, Buttons (dort 600)." },
+      "subhead": { "displayName": "Subhead", "purpose": "Vorschauen, Taglines, Platzhalter." },
+      "footnote": { "displayName": "Footnote", "purpose": "Status, Zeiten, Hinweise, Fehler." },
+      "caption": { "displayName": "Caption", "purpose": "Zeit-Divider, Absendername, Zustellstatus; ID-Label uppercase +0.06em." }
+    },
+    "shadows": [
+      { "name": "shadow-sheet", "value": "0 -8px 40px rgba(0, 0, 0, 0.18)", "darkValue": "0 -8px 40px rgba(0, 0, 0, 0.6)", "purpose": "Nach oben geworfen unter mobilen Bottom-Sheets." },
+      { "name": "shadow-pop", "value": "0 10px 34px rgba(0, 0, 0, 0.16)", "darkValue": "0 10px 34px rgba(0, 0, 0, 0.55)", "purpose": "Desktop-Dialoge (Sheets ab 761px)." },
+      { "name": "segment-active", "value": "0 1px 4px rgba(0, 0, 0, 0.12)", "purpose": "Das gehobene aktive Segment im Segmented Control." },
+      { "name": "app-icon", "value": "0 6px 18px rgba(10, 95, 215, 0.35)", "purpose": "Einziger farbiger Schatten, nur unter dem Marken-Icon." }
+    ],
+    "motion": [
+      { "name": "ease-spring", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Feder-Ease für alles Expressive: Bubble senden/empfangen, Sheets." },
+      { "name": "ease-state", "value": "ease-out 0.12s–0.15s", "purpose": "Hover-, Fokus- und Pressed-Übergänge." },
+      { "name": "bubble-send", "value": "0.38s ease-spring, FLIP von der Eingabe-Pille via --send-dx/--send-dy, Overshoot bei 70%", "purpose": "Signature-Moment: die Bubble löst sich aus der Eingabe-Pille." },
+      { "name": "bubble-receive", "value": "0.28s ease-spring, aus translateY(8px) scale(0.94)", "purpose": "Eingehende Nachricht landet weich." },
+      { "name": "sheet-up", "value": "0.4s ease-spring von translateY(100%)", "purpose": "Bottom-Sheet mobil." },
+      { "name": "sheet-pop", "value": "0.28s ease-spring aus translateY(28px) scale(0.98)", "purpose": "Dialog ab 761px." },
+      { "name": "backdrop-dim", "value": "0.3s ease-out auf rgba(0,0,0,0.4)", "purpose": "Backdrop hinter Sheets." },
+      { "name": "typing-pulse", "value": "1.2s infinite ease-in-out, 0.15s versetzt", "purpose": "Drei pulsierende Punkte im Typing-Indikator." },
+      { "name": "reduced-motion", "value": "prefers-reduced-motion: reduce schaltet Bubble- und Sheet-Animationen ab", "purpose": "Zugänglichkeits-Invariante." }
+    ],
+    "breakpoints": [
+      { "name": "mobile-max", "value": "760px", "purpose": "Darunter: einspaltig, Konversation als eigener Screen, Bottom-Sheets." },
+      { "name": "desktop-min", "value": "761px", "purpose": "Ab hier: zwei Spalten, Sheets als zentrierte Dialoge." },
+      { "name": "frame-max", "value": "1440px", "purpose": "Maximale App-Breite, zentriert." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button (Filled)",
+      "kind": "button",
+      "refersTo": "button-filled",
+      "description": "Hauptaktion in Formularen und Sheets; volle Breite, 600er-Gewicht.",
+      "html": "<button class=\"ds-btn-filled\">Chat starten</button>",
+      "css": ".ds-btn-filled { display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%; border: none; border-radius: 12px; padding: 13px; font-size: 16px; font-weight: 600; cursor: pointer; background: var(--accent, #007aff); color: #fff; transition: background 0.15s ease-out, transform 0.15s ease-out; } .ds-btn-filled:hover { background: var(--accent-pressed, #0062cc); } .ds-btn-filled:active { transform: scale(0.98); } .ds-btn-filled:focus-visible { outline: 2px solid var(--accent, #007aff); outline-offset: 2px; } .ds-btn-filled:disabled { background: var(--fill-strong, rgba(120,120,128,0.2)); color: var(--secondary, #59595e); cursor: default; transform: none; }"
+    },
+    {
+      "name": "Tinted Button",
+      "kind": "button",
+      "refersTo": "button-tinted",
+      "description": "Nebenaktion in Akzent-Tinte, z. B. „Neuen Chat starten“ im Leerzustand.",
+      "html": "<button class=\"ds-btn-tinted\">Neuen Chat starten</button>",
+      "css": ".ds-btn-tinted { display: flex; align-items: center; justify-content: center; gap: 7px; border: none; border-radius: 12px; padding: 10px 18px; font-size: 16px; font-weight: 600; cursor: pointer; background: var(--tint, rgba(0,122,255,0.12)); color: var(--accent, #007aff); transition: background 0.15s ease-out; } .ds-btn-tinted:hover { background: var(--fill-strong, rgba(120,120,128,0.2)); } .ds-btn-tinted:focus-visible { outline: 2px solid var(--accent, #007aff); outline-offset: 2px; }"
+    },
+    {
+      "name": "Segmented Control",
+      "kind": "chip",
+      "refersTo": "button-filled",
+      "description": "iOS-Segmented für Anmelden/Registrieren und Direkt/Gruppe; das aktive Segment liegt gehoben auf Panel-Weiß.",
+      "html": "<div class=\"ds-segmented\"><button class=\"ds-segment ds-segment-active\">Anmelden</button><button class=\"ds-segment\">Registrieren</button></div>",
+      "css": ".ds-segmented { display: flex; background: var(--fill, rgba(120,120,128,0.12)); border-radius: 9px; padding: 2px; width: 280px; } .ds-segment { flex: 1; border: none; background: none; padding: 7px 10px; border-radius: 7px; font-size: 14px; font-weight: 500; color: var(--label, #000); cursor: pointer; transition: background 0.15s ease-out, box-shadow 0.15s ease-out; } .ds-segment-active { background: var(--panel, #fff); box-shadow: 0 1px 4px rgba(0,0,0,0.12); font-weight: 600; }"
+    },
+    {
+      "name": "Bubble (ausgehend)",
+      "kind": "custom",
+      "refersTo": "bubble-out",
+      "description": "iMessage-Grammatik: blauer 178deg-Verlauf, 18px-Radius mit 5px-Stapelecke rechts unten, keine Uhrzeit.",
+      "html": "<div class=\"ds-bubble-out\">Bis gleich – ich schreibe auf Deutsch, du liest auf Polnisch.</div>",
+      "css": ".ds-bubble-out { max-width: min(72%, 520px); margin-left: auto; width: fit-content; padding: 8px 13px; border-radius: 18px; border-bottom-right-radius: 5px; font-size: 16px; line-height: 1.35; word-wrap: break-word; white-space: pre-wrap; background: linear-gradient(178deg, var(--bubble-out, #007aff), var(--bubble-out-deep, #0f6fe0)); color: var(--bubble-out-text, #fff); }"
+    },
+    {
+      "name": "Bubble (eingehend)",
+      "kind": "custom",
+      "refersTo": "bubble-in",
+      "description": "Empfangene Nachricht in iMessage-Grau mit 5px-Stapelecke links unten.",
+      "html": "<div class=\"ds-bubble-in\">Do zobaczenia!</div>",
+      "css": ".ds-bubble-in { max-width: min(72%, 520px); width: fit-content; padding: 8px 13px; border-radius: 18px; border-bottom-left-radius: 5px; font-size: 16px; line-height: 1.35; word-wrap: break-word; white-space: pre-wrap; background: var(--bubble-in, #e9e9eb); color: var(--bubble-in-text, #000); }"
+    },
+    {
+      "name": "Composer",
+      "kind": "input",
+      "refersTo": "composer-input",
+      "description": "Eingabe-Pille (19px, Hairline-Rand, Fokus färbt den Rand blau) mit 34px-Send-Kreis.",
+      "html": "<div class=\"ds-composer\"><input class=\"ds-composer-input\" type=\"text\" placeholder=\"Nachricht\"><button class=\"ds-send-btn\" title=\"Senden\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\"><path d=\"M12 19V6M6.5 11 12 5.5 17.5 11\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/></svg></button></div>",
+      "css": ".ds-composer { display: flex; align-items: center; gap: 8px; padding: 8px 12px; width: 340px; } .ds-composer-input { flex: 1; padding: 9px 16px; border: 1px solid var(--separator, rgba(60,60,67,0.29)); border-radius: 19px; font-size: 16px; font-family: inherit; background: var(--panel, #fff); color: var(--label, #000); } .ds-composer-input:focus { outline: none; border-color: var(--accent, #007aff); } .ds-composer-input::placeholder { color: var(--secondary, #59595e); } .ds-send-btn { width: 34px; height: 34px; border: none; border-radius: 50%; background: var(--accent, #007aff); color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: background 0.15s ease-out, transform 0.15s ease-out; } .ds-send-btn:hover { background: var(--accent-pressed, #0062cc); } .ds-send-btn:active { transform: scale(0.92); }"
+    },
+    {
+      "name": "Chat List Item",
+      "kind": "nav",
+      "refersTo": "chat-item-active",
+      "description": "Listenzeile mit Hue-Hash-Avatar, Online-Dot, tabularer Zeit und Unread-Badge; Hairline nur unter dem Textteil.",
+      "html": "<button class=\"ds-chat-item\"><span class=\"ds-avatar-wrap\"><span class=\"ds-avatar\">MK</span><span class=\"ds-online-dot\"></span></span><span class=\"ds-chat-main\"><span class=\"ds-chat-top\"><span class=\"ds-chat-name\">Marta Kowalska</span><span class=\"ds-chat-time\">14:32</span></span><span class=\"ds-chat-bottom\"><span class=\"ds-chat-preview\">Do zobaczenia!</span><span class=\"ds-unread\">2</span></span></span></button>",
+      "css": ".ds-chat-item { display: flex; align-items: center; gap: 12px; width: 340px; padding: 9px 16px; cursor: pointer; background: none; border: none; font: inherit; color: inherit; text-align: left; transition: background 0.12s ease-out; } .ds-chat-item:hover { background: var(--fill, rgba(120,120,128,0.12)); } .ds-avatar-wrap { position: relative; } .ds-avatar { width: 44px; height: 44px; border-radius: 50%; color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 17px; background: linear-gradient(150deg, hsl(210 72% 58%), hsl(252 72% 42%)); } .ds-online-dot { width: 12px; height: 12px; background: #34c759; border-radius: 50%; border: 2.5px solid var(--bg, #f2f2f7); position: absolute; right: -1px; bottom: -1px; } .ds-chat-main { flex: 1; min-width: 0; border-bottom: 0.5px solid var(--separator, rgba(60,60,67,0.29)); padding: 6px 0 10px; display: block; } .ds-chat-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; } .ds-chat-name { font-size: 17px; font-weight: 600; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ds-chat-time { font-size: 14px; color: var(--secondary, #59595e); flex-shrink: 0; font-variant-numeric: tabular-nums; } .ds-chat-bottom { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-top: 2px; } .ds-chat-preview { font-size: 15px; color: var(--secondary, #59595e); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ds-unread { background: var(--accent, #007aff); color: #fff; font-size: 13px; font-weight: 600; border-radius: 11px; min-width: 21px; height: 21px; display: flex; align-items: center; justify-content: center; padding: 0 6px; flex-shrink: 0; font-variant-numeric: tabular-nums; }"
+    },
+    {
+      "name": "Member Chip",
+      "kind": "chip",
+      "refersTo": "button-tinted",
+      "description": "Getönter Chip für Gruppenmitglieder mit rundem Entfernen-Knopf.",
+      "html": "<span class=\"ds-member-chip\">Marta<button title=\"Entfernen\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\"><path d=\"m6.5 6.5 11 11m0-11-11 11\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/></svg></button></span>",
+      "css": ".ds-member-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--tint, rgba(0,122,255,0.12)); color: var(--accent, #007aff); border-radius: 15px; padding: 5px 6px 5px 12px; font-size: 14px; font-weight: 500; } .ds-member-chip button { background: none; border: none; color: inherit; cursor: pointer; padding: 2px; border-radius: 50%; display: flex; } .ds-member-chip button:hover { background: var(--fill-strong, rgba(120,120,128,0.2)); }"
+    },
+    {
+      "name": "ID-Karte",
+      "kind": "card",
+      "refersTo": "button-tinted",
+      "description": "Signature-Objekt (Snapchat-Hauch): die teilbare InterChat-ID auf blauem Marken-Verlauf.",
+      "html": "<div class=\"ds-id-card\"><div class=\"ds-id-label\">Meine InterChat-ID</div><div class=\"ds-id-row\"><span class=\"ds-id-code\">AB2C-3DEF</span><button class=\"ds-id-copy\">Kopieren</button></div><div class=\"ds-id-hint\">Teile diese ID – nur wer sie kennt, kann dir schreiben.</div></div>",
+      "css": ".ds-id-card { background: linear-gradient(150deg, #1e6fe0, #0a4fae); border-radius: 14px; padding: 16px; color: #fff; width: 320px; } .ds-id-label { font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; } .ds-id-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 6px; } .ds-id-code { font-size: 25px; font-weight: 700; letter-spacing: 0.08em; font-variant-numeric: tabular-nums; user-select: all; } .ds-id-copy { border: none; cursor: pointer; background: rgba(255,255,255,0.22); color: #fff; border-radius: 9px; padding: 7px 12px; font-size: 14px; font-weight: 600; transition: background 0.15s ease-out; } .ds-id-copy:hover { background: rgba(255,255,255,0.34); } .ds-id-hint { font-size: 12.5px; margin-top: 9px; line-height: 1.35; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "Die native Selbstverständlichkeit",
+    "overview": "InterChat sieht nicht aus wie eine Web-App, die einen Messenger nachbaut — es verhält sich wie eine native Apple-App, in der die Übersetzung als Feature verschwindet. Die gesamte Oberfläche spricht die iOS-Systemsprache: SF-Stack, iOS-Systempalette mit systemBlue als einzigem Akzent, iMessage-Bubble-Grammatik, translucente Bars mit Blur, Hairline-Separatoren statt Karten und Schatten. Der einzige bewusst fremde Einschlag ist ein Hauch Snapchat: Avatare tragen einen personengebundenen Farbverlauf (Hue aus dem Namens-Hash), und die InterChat-ID lebt als spielerisch teilbare Identitätskarte in den Einstellungen. Verweigert wird der WhatsApp-Klon in Grün ebenso wie jede generische Web-App-Anmutung mit dekorativen Karten.",
+    "keyCharacteristics": [
+      "Ein Akzent (systemBlue), sonst ausschließlich Graustufen-Systemrollen",
+      "Vollständige Light/Dark-Symmetrie über CSS-Custom-Properties auf :root",
+      "Hairlines (0.5px) statt Kästen; Tiefe nur an Overlays und Zustandswechseln",
+      "Feder-Ease cubic-bezier(0.16, 1, 0.3, 1) als einzige expressive Bewegungskurve",
+      "Stroked-SVG-Icons in SF-Symbols-Anmutung aus einem Inline-Sprite"
+    ],
+    "rules": [
+      { "name": "Die Ein-Akzent-Regel", "body": "systemBlue ist die einzige Akzentfarbe der Welt. Grün existiert nur als Präsenz-Dot, Rot nur als Fehler/Destruktiv-Text. Eine zweite Akzentfarbe einzuführen bricht die Welt.", "section": "colors" },
+      { "name": "Die Avatar-Hue-Regel", "body": "Avatare sind der einzige Ort freier Farbe: Der Hue wird deterministisch aus dem Namen gehasht und als Verlauf linear-gradient(150deg, hsl(H 72% 58%), hsl(H+42 72% 42%)) gemalt — pro Person stabil, nie manuell gewählt, nie außerhalb von Avataren verwendet.", "section": "colors" },
+      { "name": "Die Tabular-Regel", "body": "Alles Zählbare — Zeiten, Unread-Badges, die InterChat-ID — läuft in font-variant-numeric: tabular-nums.", "section": "typography" },
+      { "name": "Die Ein-Familien-Regel", "body": "Es gibt keine zweite Schriftfamilie, keinen Webfont, kein Mono-Display. Hierarchie entsteht aus 400/500/600/700 und negativem Tracking ab 17px.", "section": "typography" },
+      { "name": "Die Hairline-Regel", "body": "Flächen werden durch 0.5px-Separatoren und Tonwechsel getrennt, nie durch Rahmen-Boxen oder Ruhe-Schatten. Schatten sind Overlays und gehobenen Zuständen vorbehalten.", "section": "elevation" },
+      { "name": "Die Material-Regel", "body": "Bars (Header, Composer) sind immer --panel-translucent + backdrop-filter: blur(18px) saturate(1.6) + Hairline an der Innenkante — nie opak, nie mit Schatten.", "section": "elevation" },
+      { "name": "Die Feder-Regel", "body": "Expressive Bewegung nutzt ausschließlich cubic-bezier(0.16, 1, 0.3, 1) und respektiert prefers-reduced-motion. Nichts bounct mit anderen Kurven.", "section": "components" }
+    ],
+    "dos": [
+      "Do jede Farbe über die :root-Custom-Properties beziehen — jeder Token hat einen Dark-Zwilling; neue Werte brauchen beide Definitionen.",
+      "Do Hairlines mit 0.5px und --separator ziehen und Listen im inset-Stil führen (Linie nur unter dem Textteil, letzte Zeile ohne).",
+      "Do neue Icons als stroked <symbol> im Sprite anlegen (24er-ViewBox, 1.6–2.4 Strich, currentColor, runde Kappen).",
+      "Do Interaktives blau markieren: Flächen --accent, Nebenaktionen --tint, Zustände über --fill/--fill-strong.",
+      "Do Zeiten, IDs und Zähler in tabular-nums setzen.",
+      "Do neue Overlays als Sheet bauen: Handle, Titelzeile mit X, mobil von unten, ab 761px als zentrierter Pop."
+    ],
+    "donts": [
+      "Don't eine zweite Akzentfarbe einführen — Grün bleibt Präsenz-Dot, Rot bleibt Fehler/Destruktiv.",
+      "Don't Karten mit Ruhe-Schatten oder sichtbaren Rahmen bauen; Tiefe gehört Overlays und gehobenen Zuständen.",
+      "Don't Uhrzeiten in Bubbles schreiben oder Status unter jede Nachricht setzen — Zeit-Divider und einmaliger Status sind die Grammatik.",
+      "Don't Verläufe als Flächenfarbe streuen: Verlauf gibt es nur an Avataren (Hue-Hash), ausgehenden Bubbles, App-Icon und ID-Karte.",
+      "Don't Webfonts, Icon-Fonts oder gefüllte Glyphen laden — SF-Stack und das stroked Sprite sind die einzige Schrift- und Zeichensprache.",
+      "Don't Animationen ohne prefers-reduced-motion-Fallback ausliefern."
+    ]
+  }
+}

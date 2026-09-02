@@ -231,7 +231,7 @@ button { font-family: inherit; color: inherit; }
 
 .btn-plain { background: none; }
 .btn-plain.destructive { color: var(--destructive); }
-.btn-plain.destructive:hover { background: rgba(255, 59, 48, 0.1); }
+.btn-plain.destructive:hover { background: color-mix(in srgb, var(--destructive) 10%, transparent); }
 
 .btn-compact { width: auto; padding: 7px 12px; font-size: 14px; border-radius: 9px; }
 
