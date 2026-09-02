@@ -10,10 +10,11 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const { Server } = require('socket.io');
 
-const { db, dataDir } = require('./db');
+const { db, dataDir, generateUniqueUserCode, directKey } = require('./db');
 const { translateMessage } = require('./translate');
 
 const PORT = Number(process.env.PORT || 3000);
+const MAX_GROUP_MEMBERS = 64;
 
 // JWT-Secret: aus der Umgebung, sonst einmalig erzeugen und lokal ablegen.
 const secretFile = path.join(dataDir, '.jwt-secret');
@@ -42,47 +43,67 @@ app.use(express.static(path.join(__dirname, '..', 'public')));
 
 const stmt = {
   insertUser: db.prepare(
-    'INSERT INTO users (username, password_hash, display_name, language, created_at) VALUES (?, ?, ?, ?, ?)'
+    'INSERT INTO users (username, password_hash, display_name, language, user_code, created_at) VALUES (?, ?, ?, ?, ?, ?)'
   ),
   userByUsername: db.prepare('SELECT * FROM users WHERE username = ?'),
   userById: db.prepare('SELECT * FROM users WHERE id = ?'),
+  userByCode: db.prepare('SELECT * FROM users WHERE user_code = ?'),
   updateProfile: db.prepare('UPDATE users SET display_name = ?, language = ? WHERE id = ?'),
-  searchUsers: db.prepare(
-    `SELECT id, username, display_name, language FROM users
-     WHERE (username LIKE ? ESCAPE '\\' OR display_name LIKE ? ESCAPE '\\') AND id != ?
-     ORDER BY username LIMIT 20`
+
+  conversationById: db.prepare('SELECT * FROM conversations WHERE id = ?'),
+  conversationByDirectKey: db.prepare('SELECT * FROM conversations WHERE direct_key = ?'),
+  insertDirect: db.prepare(
+    "INSERT INTO conversations (type, direct_key, created_at) VALUES ('direct', ?, ?)"
   ),
+  insertGroup: db.prepare(
+    "INSERT INTO conversations (type, name, owner_id, created_at) VALUES ('group', ?, ?, ?)"
+  ),
+  renameGroup: db.prepare('UPDATE conversations SET name = ? WHERE id = ?'),
+
+  members: db.prepare(
+    `SELECT m.*, u.username, u.display_name, u.language, u.user_code
+     FROM conversation_members m JOIN users u ON u.id = m.user_id
+     WHERE m.conversation_id = ? ORDER BY m.joined_at`
+  ),
+  membership: db.prepare(
+    'SELECT * FROM conversation_members WHERE conversation_id = ? AND user_id = ?'
+  ),
+  insertMember: db.prepare(
+    'INSERT OR IGNORE INTO conversation_members (conversation_id, user_id, joined_at) VALUES (?, ?, ?)'
+  ),
+  removeMember: db.prepare(
+    'DELETE FROM conversation_members WHERE conversation_id = ? AND user_id = ?'
+  ),
+  memberCount: db.prepare(
+    'SELECT COUNT(*) AS n FROM conversation_members WHERE conversation_id = ?'
+  ),
+  conversationsOf: db.prepare(
+    `SELECT c.* FROM conversations c
+     JOIN conversation_members m ON m.conversation_id = c.id
+     WHERE m.user_id = ?`
+  ),
+
   insertMessage: db.prepare(
-    'INSERT INTO messages (sender_id, recipient_id, text, lang, created_at) VALUES (?, ?, ?, ?, ?)'
+    'INSERT INTO messages (conversation_id, sender_id, text, lang, created_at) VALUES (?, ?, ?, ?, ?)'
   ),
   messageById: db.prepare('SELECT * FROM messages WHERE id = ?'),
-  markDelivered: db.prepare(
-    'UPDATE messages SET delivered_at = ? WHERE id = ? AND delivered_at IS NULL'
+  lastMessage: db.prepare(
+    'SELECT * FROM messages WHERE conversation_id = ? ORDER BY id DESC LIMIT 1'
   ),
-  markPairDelivered: db.prepare(
-    `UPDATE messages SET delivered_at = ?
-     WHERE recipient_id = ? AND delivered_at IS NULL`
+  history: db.prepare(
+    'SELECT * FROM messages WHERE conversation_id = ? ORDER BY id DESC LIMIT ?'
   ),
-  markPairRead: db.prepare(
-    `UPDATE messages SET read_at = ?, delivered_at = COALESCE(delivered_at, ?)
-     WHERE sender_id = ? AND recipient_id = ? AND read_at IS NULL`
+  unreadCount: db.prepare(
+    'SELECT COUNT(*) AS n FROM messages WHERE conversation_id = ? AND id > ? AND sender_id != ?'
   ),
-  pairHistory: db.prepare(
-    `SELECT * FROM messages
-     WHERE (sender_id = ? AND recipient_id = ?) OR (sender_id = ? AND recipient_id = ?)
-     ORDER BY id DESC LIMIT ?`
+  advanceDelivered: db.prepare(
+    `UPDATE conversation_members SET last_delivered_id = MAX(last_delivered_id, ?)
+     WHERE conversation_id = ? AND user_id = ?`
   ),
-  chatList: db.prepare(
-    `SELECT peer_id, MAX(id) AS last_id,
-            SUM(CASE WHEN direction = 'in' AND read_at IS NULL THEN 1 ELSE 0 END) AS unread
-     FROM (
-       SELECT id, recipient_id AS peer_id, 'out' AS direction, read_at
-         FROM messages WHERE sender_id = ?
-       UNION ALL
-       SELECT id, sender_id AS peer_id, 'in' AS direction, read_at
-         FROM messages WHERE recipient_id = ?
-     )
-     GROUP BY peer_id ORDER BY last_id DESC`
+  advanceRead: db.prepare(
+    `UPDATE conversation_members
+     SET last_read_id = MAX(last_read_id, ?), last_delivered_id = MAX(last_delivered_id, ?)
+     WHERE conversation_id = ? AND user_id = ?`
   ),
 };
 
@@ -95,6 +116,10 @@ function publicUser(user) {
     displayName: user.display_name,
     language: user.language,
   };
+}
+
+function selfUser(user) {
+  return { ...publicUser(user), userCode: user.user_code };
 }
 
 function signToken(user) {
@@ -120,9 +145,30 @@ function validLanguage(lang) {
   return SUPPORTED_LANGUAGES.includes(String(lang || '').toLowerCase());
 }
 
-// Nachricht aus Sicht eines bestimmten Nutzers aufbereiten:
-// eigene Nachrichten bleiben im Original, fremde werden übersetzt.
-async function viewMessage(msg, viewer) {
+function normalizeCode(raw) {
+  const cleaned = String(raw || '').toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (cleaned.length !== 8) return null;
+  return `${cleaned.slice(0, 4)}-${cleaned.slice(4)}`;
+}
+
+// Status einer eigenen Nachricht: zugestellt/gelesen erst, wenn ALLE anderen
+// Mitglieder so weit sind (WhatsApp-Verhalten, auch in Gruppen).
+function statusBounds(members, senderId) {
+  let delivered = Infinity;
+  let read = Infinity;
+  for (const m of members) {
+    if (m.user_id === senderId) continue;
+    delivered = Math.min(delivered, m.last_delivered_id);
+    read = Math.min(read, m.last_read_id);
+  }
+  if (delivered === Infinity) delivered = 0;
+  if (read === Infinity) read = 0;
+  return { delivered, read };
+}
+
+// Nachricht aus Sicht eines Nutzers: eigene bleiben Original, fremde werden
+// in dessen Sprache übersetzt.
+async function viewMessage(msg, viewer, members) {
   const outgoing = msg.sender_id === viewer.id;
   let translation = null;
   if (!outgoing && msg.lang !== viewer.language) {
@@ -134,17 +180,59 @@ async function viewMessage(msg, viewer) {
     });
     translation = { text: t.text, lang: viewer.language, translated: t.translated, failed: t.failed };
   }
+  let status = null;
+  if (outgoing && members) {
+    const bounds = statusBounds(members, viewer.id);
+    status = bounds.read >= msg.id ? 'read' : bounds.delivered >= msg.id ? 'delivered' : 'sent';
+  }
+  const sender = members?.find((m) => m.user_id === msg.sender_id);
   return {
     id: msg.id,
+    conversationId: msg.conversation_id,
     senderId: msg.sender_id,
-    recipientId: msg.recipient_id,
+    senderName: sender ? sender.display_name : null,
     outgoing,
     original: { text: msg.text, lang: msg.lang },
     translation,
+    status,
     createdAt: msg.created_at,
-    deliveredAt: msg.delivered_at,
-    readAt: msg.read_at,
   };
+}
+
+function conversationTitle(conv, members, viewerId) {
+  if (conv.type === 'group') return conv.name || 'Gruppe';
+  const peer = members.find((m) => m.user_id !== viewerId);
+  return peer ? peer.display_name : 'Chat';
+}
+
+async function conversationSummary(conv, viewer) {
+  const members = stmt.members.all(conv.id);
+  const me = members.find((m) => m.user_id === viewer.id);
+  const last = stmt.lastMessage.get(conv.id);
+  const peer = conv.type === 'direct' ? members.find((m) => m.user_id !== viewer.id) : null;
+  return {
+    id: conv.id,
+    type: conv.type,
+    title: conversationTitle(conv, members, viewer.id),
+    members: members.map((m) => ({
+      id: m.user_id,
+      displayName: m.display_name,
+      language: m.language,
+    })),
+    peerId: peer ? peer.user_id : null,
+    online: peer
+      ? isOnline(peer.user_id)
+      : members.some((m) => m.user_id !== viewer.id && isOnline(m.user_id)),
+    unread: last ? stmt.unreadCount.get(conv.id, me ? me.last_read_id : 0, viewer.id).n : 0,
+    lastMessage: last ? await viewMessage(last, viewer, members) : null,
+  };
+}
+
+function assertMembership(conversationId, userId) {
+  const conv = stmt.conversationById.get(Number(conversationId));
+  if (!conv) return null;
+  if (!stmt.membership.get(conv.id, userId)) return null;
+  return conv;
 }
 
 // ----------------------------------------------------------------------- API
@@ -170,9 +258,11 @@ app.post('/api/register', async (req, res) => {
     return res.status(409).json({ error: 'username_taken' });
   }
   const hash = await bcrypt.hash(password, 10);
-  const result = stmt.insertUser.run(name, hash, display, language.toLowerCase(), Date.now());
+  const result = stmt.insertUser.run(
+    name, hash, display, language.toLowerCase(), generateUniqueUserCode(), Date.now()
+  );
   const user = stmt.userById.get(result.lastInsertRowid);
-  res.json({ token: signToken(user), user: publicUser(user) });
+  res.json({ token: signToken(user), user: selfUser(user) });
 });
 
 app.post('/api/login', async (req, res) => {
@@ -181,11 +271,11 @@ app.post('/api/login', async (req, res) => {
   if (!user || !(await bcrypt.compare(String(password || ''), user.password_hash))) {
     return res.status(401).json({ error: 'invalid_credentials' });
   }
-  res.json({ token: signToken(user), user: publicUser(user) });
+  res.json({ token: signToken(user), user: selfUser(user) });
 });
 
 app.get('/api/me', requireAuth, (req, res) => {
-  res.json({ user: publicUser(req.user) });
+  res.json({ user: selfUser(req.user) });
 });
 
 app.patch('/api/me', requireAuth, (req, res) => {
@@ -195,43 +285,107 @@ app.patch('/api/me', requireAuth, (req, res) => {
   const lang = language != null ? String(language).toLowerCase() : req.user.language;
   if (!validLanguage(lang)) return res.status(400).json({ error: 'invalid_language' });
   stmt.updateProfile.run(display, lang, req.user.id);
-  res.json({ user: publicUser(stmt.userById.get(req.user.id)) });
+  res.json({ user: selfUser(stmt.userById.get(req.user.id)) });
 });
 
-app.get('/api/users', requireAuth, (req, res) => {
-  const q = String(req.query.q || '').trim();
-  if (q.length < 2) return res.json({ users: [] });
-  const like = `%${q.replace(/[\\%_]/g, (c) => '\\' + c)}%`;
-  const rows = stmt.searchUsers.all(like, like, req.user.id);
-  res.json({ users: rows.map((u) => ({ id: u.id, username: u.username, displayName: u.display_name, language: u.language })) });
+// Kontaktaufnahme ausschließlich über die User-ID (keine öffentliche Suche).
+app.post('/api/contacts/lookup', requireAuth, (req, res) => {
+  const code = normalizeCode(req.body?.code);
+  if (!code) return res.status(400).json({ error: 'invalid_code' });
+  const user = stmt.userByCode.get(code);
+  if (!user || user.id === req.user.id) return res.status(404).json({ error: 'not_found' });
+  res.json({ user: publicUser(user) });
+});
+
+function resolveCodes(codes, self) {
+  const users = [];
+  for (const raw of Array.isArray(codes) ? codes.slice(0, MAX_GROUP_MEMBERS) : []) {
+    const code = normalizeCode(raw);
+    const user = code ? stmt.userByCode.get(code) : null;
+    if (!user) return { error: raw };
+    if (user.id !== self.id && !users.some((u) => u.id === user.id)) users.push(user);
+  }
+  return { users };
+}
+
+app.post('/api/conversations', requireAuth, async (req, res) => {
+  const { type } = req.body || {};
+  const now = Date.now();
+
+  if (type === 'direct') {
+    const code = normalizeCode(req.body?.code);
+    const peer = code ? stmt.userByCode.get(code) : null;
+    if (!peer || peer.id === req.user.id) return res.status(404).json({ error: 'not_found' });
+    const key = directKey(req.user.id, peer.id);
+    let conv = stmt.conversationByDirectKey.get(key);
+    if (!conv) {
+      const id = stmt.insertDirect.run(key, now).lastInsertRowid;
+      stmt.insertMember.run(id, req.user.id, now);
+      stmt.insertMember.run(id, peer.id, now);
+      conv = stmt.conversationById.get(id);
+      notifyNewConversation(conv, req.user.id);
+    }
+    return res.json({ conversation: await conversationSummary(conv, req.user) });
+  }
+
+  if (type === 'group') {
+    const name = String(req.body?.name || '').trim().slice(0, 64);
+    if (!name) return res.status(400).json({ error: 'invalid_name' });
+    const { users, error } = resolveCodes(req.body?.codes, req.user);
+    if (error !== undefined) return res.status(404).json({ error: 'member_not_found', code: error });
+    if (users.length === 0) return res.status(400).json({ error: 'no_members' });
+    const id = stmt.insertGroup.run(name, req.user.id, now).lastInsertRowid;
+    stmt.insertMember.run(id, req.user.id, now);
+    for (const user of users) stmt.insertMember.run(id, user.id, now);
+    const conv = stmt.conversationById.get(id);
+    notifyNewConversation(conv, req.user.id);
+    return res.json({ conversation: await conversationSummary(conv, req.user) });
+  }
+
+  res.status(400).json({ error: 'invalid_type' });
+});
+
+app.post('/api/conversations/:id/members', requireAuth, async (req, res) => {
+  const conv = assertMembership(req.params.id, req.user.id);
+  if (!conv || conv.type !== 'group') return res.status(404).json({ error: 'not_found' });
+  if (stmt.memberCount.get(conv.id).n >= MAX_GROUP_MEMBERS) {
+    return res.status(400).json({ error: 'group_full' });
+  }
+  const code = normalizeCode(req.body?.code);
+  const user = code ? stmt.userByCode.get(code) : null;
+  if (!user) return res.status(404).json({ error: 'not_found' });
+  stmt.insertMember.run(conv.id, user.id, Date.now());
+  emitToUser(user.id, 'conversation:new', {});
+  emitConversationChanged(conv.id);
+  res.json({ conversation: await conversationSummary(conv, req.user) });
+});
+
+app.post('/api/conversations/:id/leave', requireAuth, (req, res) => {
+  const conv = assertMembership(req.params.id, req.user.id);
+  if (!conv || conv.type !== 'group') return res.status(404).json({ error: 'not_found' });
+  stmt.removeMember.run(conv.id, req.user.id);
+  emitConversationChanged(conv.id);
+  broadcastStatuses(conv.id);
+  res.json({ ok: true });
 });
 
 app.get('/api/chats', requireAuth, async (req, res) => {
-  const rows = stmt.chatList.all(req.user.id, req.user.id);
+  const conversations = stmt.conversationsOf.all(req.user.id);
   const chats = [];
-  for (const row of rows) {
-    const peer = stmt.userById.get(row.peer_id);
-    if (!peer) continue;
-    const last = stmt.messageById.get(row.last_id);
-    chats.push({
-      peer: publicUser(peer),
-      online: isOnline(peer.id),
-      unread: row.unread,
-      lastMessage: last ? await viewMessage(last, req.user) : null,
-    });
-  }
+  for (const conv of conversations) chats.push(await conversationSummary(conv, req.user));
+  chats.sort((x, y) => (y.lastMessage?.createdAt || 0) - (x.lastMessage?.createdAt || 0));
   res.json({ chats });
 });
 
-app.get('/api/messages/:peerId', requireAuth, async (req, res) => {
-  const peerId = Number(req.params.peerId);
-  const peer = stmt.userById.get(peerId);
-  if (!peer) return res.status(404).json({ error: 'not_found' });
-  const limit = Math.min(Number(req.query.limit) || 50, 200);
-  const rows = stmt.pairHistory.all(req.user.id, peerId, peerId, req.user.id, limit).reverse();
+app.get('/api/conversations/:id/messages', requireAuth, async (req, res) => {
+  const conv = assertMembership(req.params.id, req.user.id);
+  if (!conv) return res.status(404).json({ error: 'not_found' });
+  const limit = Math.min(Number(req.query.limit) || 60, 200);
+  const members = stmt.members.all(conv.id);
+  const rows = stmt.history.all(conv.id, limit).reverse();
   const messages = [];
-  for (const row of rows) messages.push(await viewMessage(row, req.user));
-  res.json({ peer: publicUser(peer), online: isOnline(peerId), messages });
+  for (const row of rows) messages.push(await viewMessage(row, req.user, members));
+  res.json({ conversation: await conversationSummary(conv, req.user), messages });
 });
 
 app.get('/health', (req, res) => res.json({ ok: true }));
@@ -248,6 +402,48 @@ function emitToUser(userId, event, payload) {
   const sockets = onlineSockets.get(userId);
   if (!sockets) return;
   for (const socketId of sockets) io.to(socketId).emit(event, payload);
+}
+
+function notifyNewConversation(conv, exceptUserId) {
+  for (const m of stmt.members.all(conv.id)) {
+    if (m.user_id !== exceptUserId) emitToUser(m.user_id, 'conversation:new', {});
+  }
+}
+
+function emitConversationChanged(conversationId) {
+  for (const m of stmt.members.all(conversationId)) {
+    emitToUser(m.user_id, 'conversation:changed', { conversationId });
+  }
+}
+
+// Jedem Mitglied den Stand mitteilen, bis zu dem seine EIGENEN Nachrichten
+// zugestellt bzw. gelesen sind (Minimum über alle anderen Mitglieder).
+function broadcastStatuses(conversationId) {
+  const members = stmt.members.all(conversationId);
+  for (const m of members) {
+    if (!isOnline(m.user_id)) continue;
+    const bounds = statusBounds(members, m.user_id);
+    emitToUser(m.user_id, 'conversation:status', {
+      conversationId,
+      deliveredUpTo: bounds.delivered,
+      readUpTo: bounds.read,
+    });
+  }
+}
+
+// Beim Verbinden gelten alle wartenden Nachrichten als zugestellt.
+function markAllDelivered(userId) {
+  const changed = [];
+  for (const conv of stmt.conversationsOf.all(userId)) {
+    const last = stmt.lastMessage.get(conv.id);
+    if (!last) continue;
+    const me = stmt.membership.get(conv.id, userId);
+    if (me && me.last_delivered_id < last.id) {
+      stmt.advanceDelivered.run(last.id, conv.id, userId);
+      changed.push(conv.id);
+    }
+  }
+  return changed;
 }
 
 io.use((socket, next) => {
@@ -269,55 +465,44 @@ io.on('connection', (socket) => {
   onlineSockets.get(userId).add(socket.id);
   if (firstSocket) io.emit('presence', { userId, online: true });
 
-  // Alles, was offline ankam, ist jetzt zugestellt – Absender informieren.
-  const pendingSenders = db
-    .prepare('SELECT DISTINCT sender_id FROM messages WHERE recipient_id = ? AND delivered_at IS NULL')
-    .all(userId);
-  stmt.markPairDelivered.run(Date.now(), userId);
-  for (const row of pendingSenders) {
-    emitToUser(row.sender_id, 'message:status', { peerId: userId, status: 'delivered' });
-  }
+  for (const convId of markAllDelivered(userId)) broadcastStatuses(convId);
 
   socket.on('message:send', async (payload, ack) => {
     try {
       const sender = stmt.userById.get(userId);
-      const recipient = stmt.userById.get(Number(payload?.to));
+      const conv = assertMembership(payload?.conversationId, userId);
       const text = String(payload?.text || '').trim().slice(0, 4000);
-      if (!sender || !recipient || !text || recipient.id === sender.id) {
-        return ack?.({ error: 'invalid_message' });
-      }
+      if (!sender || !conv || !text) return ack?.({ error: 'invalid_message' });
 
-      const createdAt = Date.now();
       const result = stmt.insertMessage.run(
-        sender.id, recipient.id, text, sender.language, createdAt
+        conv.id, sender.id, text, sender.language, Date.now()
       );
       const msg = stmt.messageById.get(result.lastInsertRowid);
+      const members = stmt.members.all(conv.id);
 
-      // Für den Empfänger in dessen Sprache übersetzen.
-      const recipientView = await viewMessage(msg, recipient);
-
-      if (isOnline(recipient.id)) {
-        stmt.markDelivered.run(Date.now(), msg.id);
-        recipientView.deliveredAt = Date.now();
-        emitToUser(recipient.id, 'message:new', {
-          message: recipientView,
-          from: publicUser(sender),
-        });
-        emitToUser(sender.id, 'message:status', {
-          ids: [msg.id], peerId: recipient.id, status: 'delivered',
-        });
+      // Übersetzen und an alle Online-Mitglieder zustellen.
+      for (const member of members) {
+        if (member.user_id === sender.id) continue;
+        if (!isOnline(member.user_id)) continue;
+        stmt.advanceDelivered.run(msg.id, conv.id, member.user_id);
       }
-
-      const senderView = await viewMessage(stmt.messageById.get(msg.id), sender);
-      // Weitere eigene Geräte/Tabs synchron halten.
-      for (const socketId of onlineSockets.get(sender.id) || []) {
-        if (socketId !== socket.id) {
-          io.to(socketId).emit('message:new', {
-            message: senderView, from: publicUser(sender),
-          });
+      for (const member of members) {
+        if (!isOnline(member.user_id)) continue;
+        const viewer = stmt.userById.get(member.user_id);
+        const view = await viewMessage(msg, viewer, members);
+        if (member.user_id === sender.id) {
+          // Eigene weitere Geräte/Tabs synchron halten.
+          for (const socketId of onlineSockets.get(sender.id) || []) {
+            if (socketId !== socket.id) io.to(socketId).emit('message:new', { message: view });
+          }
+        } else {
+          emitToUser(member.user_id, 'message:new', { message: view });
         }
       }
+
+      const senderView = await viewMessage(msg, sender, stmt.members.all(conv.id));
       ack?.({ message: senderView });
+      broadcastStatuses(conv.id);
     } catch (err) {
       console.error('message:send fehlgeschlagen:', err);
       ack?.({ error: 'internal' });
@@ -325,16 +510,27 @@ io.on('connection', (socket) => {
   });
 
   socket.on('messages:read', (payload) => {
-    const peerId = Number(payload?.peerId);
-    if (!peerId) return;
-    stmt.markPairRead.run(Date.now(), Date.now(), peerId, userId);
-    emitToUser(peerId, 'message:status', { peerId: userId, status: 'read' });
+    const conv = assertMembership(payload?.conversationId, userId);
+    if (!conv) return;
+    const last = stmt.lastMessage.get(conv.id);
+    if (!last) return;
+    stmt.advanceRead.run(last.id, last.id, conv.id, userId);
+    broadcastStatuses(conv.id);
   });
 
   socket.on('typing', (payload) => {
-    const peerId = Number(payload?.to);
-    if (!peerId) return;
-    emitToUser(peerId, 'typing', { from: userId, isTyping: !!payload?.isTyping });
+    const conv = assertMembership(payload?.conversationId, userId);
+    if (!conv) return;
+    const me = stmt.userById.get(userId);
+    for (const member of stmt.members.all(conv.id)) {
+      if (member.user_id === userId) continue;
+      emitToUser(member.user_id, 'typing', {
+        conversationId: conv.id,
+        userId,
+        name: me.display_name,
+        isTyping: !!payload?.isTyping,
+      });
+    }
   });
 
   socket.on('disconnect', () => {
