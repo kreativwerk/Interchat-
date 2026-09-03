@@ -1,411 +1,387 @@
 ---
 name: InterChat
-description: Messenger mit unsichtbarer Übersetzung in nativer Apple-Anmutung — jeder liest in seiner Sprache.
+description: Messenger in Supabase-Designsprache – durchgehend dunkel, ein grüner Akzent, Glas statt Farbe.
 colors:
-  system-blue: "#007aff"
-  system-blue-pressed: "#0062cc"
-  bubble-out-deep: "#0f6fe0"
-  system-green-presence: "#34c759"
-  destructive: "#e5271c"
-  ground: "#f2f2f7"
-  panel: "#ffffff"
-  panel-translucent: "rgba(249, 249, 249, 0.82)"
-  label: "#000000"
-  secondary-label: "#59595e"
-  tertiary-label: "#86868b"
-  separator: "rgba(60, 60, 67, 0.29)"
-  fill: "rgba(120, 120, 128, 0.12)"
-  fill-strong: "rgba(120, 120, 128, 0.2)"
-  bubble-in: "#e9e9eb"
-  tint: "rgba(0, 122, 255, 0.12)"
+  brand: "#3ecf8e"
+  brand-hover: "#2fb87a"
+  brand-deep: "#1f8a5b"
+  on-brand: "#0b1f16"
+  brand-tint: "rgba(62, 207, 142, 0.14)"
+  brand-tint-strong: "rgba(62, 207, 142, 0.24)"
+  brand-line: "rgba(62, 207, 142, 0.38)"
+  brand-glow: "rgba(62, 207, 142, 0.28)"
+  destructive: "#ff6b6b"
+  bg: "#121212"
+  panel: "#181818"
+  panel-2: "#1f1f1f"
+  panel-translucent: "rgba(24, 24, 24, 0.72)"
+  glass: "rgba(255, 255, 255, 0.05)"
+  glass-strong: "rgba(255, 255, 255, 0.09)"
+  label: "#fafafa"
+  secondary: "#a3a3a3"
+  tertiary: "#939393"
+  border: "rgba(255, 255, 255, 0.09)"
+  border-strong: "rgba(255, 255, 255, 0.16)"
 typography:
-  large-title:
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif"
-    fontSize: "34px"
-    fontWeight: 700
+  headline:
+    fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif"
+    fontSize: "22px"
+    fontWeight: 600
     letterSpacing: "-0.02em"
   title:
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif"
-    fontSize: "20px"
-    fontWeight: 700
-    letterSpacing: "-0.01em"
-  headline:
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif"
+    fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif"
     fontSize: "17px"
     fontWeight: 600
     letterSpacing: "-0.01em"
+  name:
+    fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif"
+    fontSize: "15px"
+    fontWeight: 600
+    letterSpacing: "-0.01em"
   body:
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif"
-    fontSize: "16px"
-    fontWeight: 400
-    lineHeight: 1.35
-  subhead:
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif"
+    fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif"
     fontSize: "15px"
     fontWeight: 400
     lineHeight: 1.4
-  footnote:
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif"
-    fontSize: "13px"
-    fontWeight: 400
-  caption:
-    fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif"
+  ui:
+    fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif"
+    fontSize: "14px"
+    fontWeight: 500
+  label:
+    fontFamily: "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif"
     fontSize: "12px"
+    fontWeight: 500
+    fontVariation: "tabular-nums"
+  mono:
+    fontFamily: "ui-monospace, 'SF Mono', Menlo, Consolas, monospace"
+    fontSize: "24px"
     fontWeight: 600
+    letterSpacing: "0.08em"
 rounded:
-  control-sm: "9px"
-  control: "12px"
-  sheet: "16px"
-  bubble: "18px"
-  pill: "19px"
-  circle: "50%"
+  xs: "4px"
+  sm: "6px"
+  md: "8px"
+  lg: "12px"
+  badge: "10px"
+  input-pill: "20px"
+  pill: "999px"
+  full: "50%"
 spacing:
-  stack: "2px"
+  xs: "4px"
   sm: "8px"
   md: "12px"
   lg: "16px"
+  xl: "24px"
+  2xl: "32px"
 components:
-  button-filled:
-    backgroundColor: "{colors.system-blue}"
-    textColor: "#ffffff"
-    rounded: "{rounded.control}"
-    padding: "13px"
-    typography: "{typography.body}"
-  button-filled-hover:
-    backgroundColor: "{colors.system-blue-pressed}"
+  button-primary:
+    backgroundColor: "{colors.brand}"
+    textColor: "{colors.on-brand}"
+    typography: "{typography.ui}"
+    rounded: "{rounded.sm}"
+    padding: "10px 14px"
+  button-primary-hover:
+    backgroundColor: "{colors.brand-hover}"
+  button-primary-disabled:
+    backgroundColor: "{colors.glass}"
+    textColor: "{colors.tertiary}"
   button-tinted:
-    backgroundColor: "{colors.tint}"
-    textColor: "{colors.system-blue}"
-    rounded: "{rounded.control}"
-    padding: "13px"
+    backgroundColor: "{colors.brand-tint}"
+    textColor: "{colors.brand}"
+    typography: "{typography.ui}"
+    rounded: "{rounded.sm}"
+    padding: "10px 14px"
+  button-tinted-hover:
+    backgroundColor: "{colors.brand-tint-strong}"
   button-plain-destructive:
     backgroundColor: "transparent"
     textColor: "{colors.destructive}"
-    rounded: "{rounded.control}"
-    padding: "13px"
-  bubble-in:
-    backgroundColor: "{colors.bubble-in}"
+    rounded: "{rounded.sm}"
+    padding: "10px 14px"
+  button-icon:
+    backgroundColor: "transparent"
+    textColor: "{colors.secondary}"
+    rounded: "{rounded.sm}"
+    padding: "7px"
+  button-icon-hover:
+    backgroundColor: "{colors.glass}"
     textColor: "{colors.label}"
-    rounded: "{rounded.bubble}"
-    padding: "8px 13px"
-    typography: "{typography.body}"
-  bubble-out:
-    backgroundColor: "{colors.system-blue}"
-    textColor: "#ffffff"
-    rounded: "{rounded.bubble}"
-    padding: "8px 13px"
-    typography: "{typography.body}"
-  send-button:
-    backgroundColor: "{colors.system-blue}"
-    textColor: "#ffffff"
-    rounded: "{rounded.circle}"
-    size: "34px"
-  composer-input:
+  button-icon-accent:
+    textColor: "{colors.brand}"
+  button-send:
+    backgroundColor: "{colors.brand}"
+    textColor: "{colors.on-brand}"
+    rounded: "{rounded.full}"
+    size: "36px"
+  input-grouped:
     backgroundColor: "{colors.panel}"
     textColor: "{colors.label}"
-    rounded: "{rounded.pill}"
-    padding: "9px 16px"
-  unread-badge:
-    backgroundColor: "{colors.system-blue}"
-    textColor: "#ffffff"
-    rounded: "11px"
-    height: "21px"
+    rounded: "{rounded.md}"
+    padding: "11px 14px"
+  input-grouped-focus:
+    backgroundColor: "{colors.brand-tint}"
+  input-composer:
+    backgroundColor: "{colors.panel}"
+    textColor: "{colors.label}"
+    typography: "{typography.body}"
+    rounded: "{rounded.input-pill}"
+    padding: "10px 16px"
+  segmented:
+    backgroundColor: "{colors.glass}"
+    rounded: "{rounded.md}"
+    padding: "3px"
+  segment-active:
+    backgroundColor: "{colors.panel-2}"
+    textColor: "{colors.label}"
+    rounded: "{rounded.sm}"
+    padding: "7px 10px"
+  chat-item:
+    backgroundColor: "transparent"
+    rounded: "{rounded.md}"
+    padding: "9px 10px"
+  chat-item-hover:
+    backgroundColor: "{colors.glass}"
   chat-item-active:
-    backgroundColor: "{colors.tint}"
+    backgroundColor: "{colors.brand-tint}"
+  bubble-in:
+    backgroundColor: "{colors.glass}"
+    textColor: "{colors.label}"
+    typography: "{typography.body}"
+    rounded: "{rounded.lg}"
+    padding: "9px 13px"
+  bubble-out:
+    backgroundColor: "{colors.brand-tint}"
+    textColor: "{colors.label}"
+    typography: "{typography.body}"
+    rounded: "{rounded.lg}"
+    padding: "9px 13px"
+  chip-member:
+    backgroundColor: "{colors.brand-tint}"
+    textColor: "{colors.brand}"
+    rounded: "{rounded.pill}"
+    padding: "4px 6px 4px 12px"
+  badge-unread:
+    backgroundColor: "{colors.brand}"
+    textColor: "{colors.on-brand}"
+    rounded: "{rounded.badge}"
+    height: "20px"
+  avatar:
+    backgroundColor: "{colors.glass-strong}"
+    textColor: "{colors.brand}"
+    rounded: "{rounded.full}"
+    size: "40px"
+  card-auth:
+    backgroundColor: "{colors.panel-translucent}"
+    rounded: "{rounded.lg}"
+    padding: "32px 28px 28px"
+  card-id:
+    backgroundColor: "{colors.brand-tint}"
+    textColor: "{colors.label}"
+    rounded: "{rounded.lg}"
+    padding: "16px"
+  lookup-result:
+    backgroundColor: "{colors.brand-tint}"
+    rounded: "{rounded.md}"
+    padding: "10px 14px"
+  sheet:
+    backgroundColor: "{colors.panel}"
+    rounded: "{rounded.lg}"
+    padding: "8px 20px 22px"
 ---
 
 # Design System: InterChat
 
 ## Overview
 
-**Creative North Star: "Die native Selbstverständlichkeit"**
+**Creative North Star: "Das Dashboard, das flüstert"**
 
-InterChat sieht nicht aus wie eine Web-App, die einen Messenger nachbaut — es
-verhält sich wie eine native Apple-App, in der die Übersetzung als Feature
-verschwindet. Die gesamte Oberfläche spricht die iOS-Systemsprache: SF-Stack,
-iOS-Systempalette mit systemBlue als einzigem Akzent, iMessage-Bubble-Grammatik,
-translucente Bars mit Blur, Hairline-Separatoren statt Karten und Schatten.
-Nichts ist dekoriert; jede Farbe und jede Bewegung hat eine Systembedeutung.
+InterChat sieht aus wie ein Supabase-Dashboard, in dem zufällig Menschen miteinander reden: Entwickler-Werkzeug-Ruhe in Dunkel, eine einzige grüne Stimme, und Glas statt Farbe. Die Welt gibt es nur in einer Ausführung – `color-scheme: dark`, ohne hellen Modus –, und sie baut ihre gesamte Tiefe aus drei Graustufen (#121212 / #181818 / #1f1f1f) plus Transparenzen: Hairlines sind Weiß mit 9 % Deckung, Flächen sind Weiß mit 5 %, Bars sind 72 % Panel mit Blur und Sättigung. Nichts wird bemalt; alles wird getönt.
 
-Der einzige bewusst fremde Einschlag ist ein Hauch Snapchat: Avatare tragen
-einen personengebundenen Farbverlauf (Hue aus dem Namens-Hash), und die
-InterChat-ID lebt als spielerisch teilbare Identitätskarte in den
-Einstellungen. Beides bleibt innerhalb der Apple-Grammatik — Verlauf statt
-Sticker, Karte statt Konfetti.
+Supabase-Grün (#3ecf8e) ist der einzige Akzent und trägt drei Rollen zugleich: Handlung (Primär-Button, Sende-Kreis, Compose-Icon), Zugehörigkeit (eigene Bubbles als grün getöntes Glas, aktiver Listeneintrag, ID-Karte) und Signal (Präsenz-Dot, Tipp-Indikator, Fokus-Ring). Auf Grün steht immer dunkler Text (#0b1f16), nie Weiß. Tiefe entsteht nicht durch Schatten in der Shell, sondern durch weiche grüne Glows und radiale Grün-Schleier an den Rändern.
 
-Verweigert wird der WhatsApp-Klon in Grün ebenso wie jede generische
-Web-App-Anmutung mit dekorativen Karten, Border-Boxen oder Icon-Fonts.
+Ein Hauch Snapchat bleibt in der Identität: Die User-ID ist ein Objekt (Monospace, grüne Glas-Karte mit Glow) und Avatare tragen einen persönlichen, aus der ID gehashten Farbton – aber nur in Initialen und Ring, auf dunkler Fläche, nie als bunte Scheibe. Abgelehnt sind: iMessage-Blau, bunte Bubbles, jede helle Variante, gefüllte Glyph-Icons.
 
 **Key Characteristics:**
-- Ein Akzent (systemBlue), sonst ausschließlich Graustufen-Systemrollen
-- Vollständige Light/Dark-Symmetrie über CSS-Custom-Properties auf `:root`
-- Hairlines (0.5px) statt Kästen; Tiefe nur an Overlays und Zustandswechseln
-- Feder-Ease `cubic-bezier(0.16, 1, 0.3, 1)` als einzige expressive Bewegungskurve
-- Stroked-SVG-Icons in SF-Symbols-Anmutung aus einem Inline-Sprite
+- Nur dunkel, drei Gründe, Rest ist Transparenz (Hairline .09, Glas .05, Bar .72 + Blur).
+- Ein Akzent (#3ecf8e) mit dunklem Text darauf; Rot (#ff6b6b) nur für Fehler und Abmelden.
+- Glas-Bars (Header, Composer) schweben über dem einzigen Scroller, dem Nachrichtenstrom.
+- Kompakter Inter-Satz (14 px UI, 15 px Nachrichten), negatives Tracking auf Titeln, Tabellenziffern auf Zeiten.
+- Radien 6 / 8 / 12; runde Objekte (Avatar, Sende-Kreis, Dot) sind Kreise; Chips sind Pillen.
+- Stroked SVG-Icon-Sprite (1.6–2.4 px Strich, `currentColor`), keine Glyphen, keine Emoji.
+- Signatur-Bewegung: die Bubble löst sich per FLIP aus der Eingabe-Pille und glüht kurz grün; Sheets fahren von unten auf (mobil) oder poppen (Desktop); `prefers-reduced-motion` schaltet alles ab.
 
 ## Colors
 
-Reine iOS-Systempalette: ein blauer Akzent, semantisches Grün und Rot, dazu
-Graustufen-Rollen, die in Light und Dark spiegelbildlich definiert sind. Die
-Frontmatter trägt die Light-Werte; die Dark-Werte stehen als Overrides im
-`prefers-color-scheme: dark`-Block auf `:root` und hier in Klammern.
+Drei Graustufen als Boden, Weiß-Alpha als Material, ein Grün als Stimme, ein Rot als Warnung.
 
 ### Primary
-- **System-Blau** (`--accent`, Dark: #0a84ff): der einzige Akzent der Welt.
-  Trägt alles Interaktive: gefüllte Buttons, Send-Kreis, ausgehende Bubbles,
-  Links-Farbe der Selects, Unread-Badge, aktiven Chat (als `--tint`),
-  Caret, Fokus-Ring und den „tippt…"-Zustand.
-- **System-Blau gedrückt** (`--accent-pressed`, Dark: #3395ff): Hover/Pressed
-  gefüllter Flächen. Im Dark Mode heller statt dunkler — Licht kommt hinzu.
-- **Bubble-Tiefblau** (`--bubble-out-deep`, Dark: #0967c8): unterer Stop des
-  178deg-Verlaufs ausgehender Bubbles; nie eigenständig verwendet.
-- **Akzent-Tinte** (`--tint`, Dark: rgba(10,132,255,0.22)): 12%-Blau als
-  Flächenfarbe für getönte Buttons, aktive Listenzeile, Member-Chips,
-  Input-Fokus und `::selection`.
+- **Supabase-Grün** (`brand`): Die einzige Handlungsfarbe. Füllung von Primär-Button, Sende-Kreis, Unread-Badge und Präsenz-Dot; Textfarbe von Compose-Icon, Sprach-Select, „Original anzeigen“-Toggle, Tipp-Indikator und Avatar-Standardinitialen; Fokus-Outline und Caret.
+- **Grün-Hover** (`brand-hover`): Hover-Füllung von Primär-Button und Sende-Kreis; Hover-Textfarbe des Original-Toggles.
+- **Tiefgrün** (`brand-deep`): Randlinie (1 px) unter der grünen Füllung von Primär-Button und Sende-Kreis – gibt der Fläche eine Kante ohne Schatten.
+- **Auf-Grün** (`on-brand`): Der dunkle Text auf jeder Grün-Fläche (Buttons, Badge). Weiß auf Grün kommt nicht vor.
+- **Grün-Glas** (`brand-tint`): Eigene Bubbles, aktiver Listeneintrag, sekundärer Button, Member-Chip, Lookup-Treffer, ID-Karte, Fokus-Hintergrund gruppierter Inputs, Fokus-Halo des Composers (3 px). Das „Meins“ der Welt.
+- **Grün-Glas stark** (`brand-tint-strong`): Hover der getönten Flächen und Textauswahl (`::selection`).
+- **Grün-Hairline** (`brand-line`): Border aller grün getönten Flächen und des App-Icons.
+- **Grün-Glow** (`brand-glow`): Weicher Schein hinter dem App-Icon (40 px), auf gehoverten Primär-Buttons (24 px) und Sende-Kreis (20 px), um den Präsenz-Dot (8 px) und im Sende-Höhepunkt der Bubble (28 px).
 
 ### Neutral
-- **Grund** (`--bg`, Dark: #000000): systemGray6 als App-Grund von Auth-View,
-  Seitenleiste und Sheets; im Dark Mode echtes Schwarz.
-- **Panel** (`--panel`, Dark: #1c1c1e): Weiß für Konversationsfläche,
-  gruppierte Eingaben, Eingabe-Pille, aktives Segment.
-- **Panel transluzent** (`--panel-translucent`, Dark: rgba(22,22,24,0.8)):
-  Material der Bars (Chat-Header, Composer) — immer zusammen mit
-  `backdrop-filter: blur(18px) saturate(1.6)`.
-- **Label** (`--label`, Dark: #ffffff) / **Sekundär** (`--secondary`, Dark:
-  #aeaeb5) / **Tertiär** (`--tertiary`, Dark: #8e8e93): dreistufige
-  Text-Hierarchie — Inhalt, Metadaten/Platzhalter, Leerzustände/Chevrons.
-- **Separator** (`--separator`, Dark: rgba(84,84,88,0.65)): die Hairline.
-  Immer 0.5px, nie 1px (Ausnahme: der 1px-Rand der Eingabe-Pille).
-- **Fill / Fill stark** (`--fill`, `--fill-strong`; Dark: rgba(120,120,128,
-  0.24/0.36)): neutrale Zustandsflächen — Segmented-Hintergrund, Hover auf
-  Listenzeilen und Icon-Buttons, Disabled-Buttons, Scrollbar-Daumen,
-  Sheet-Handle.
-- **Empfangene Bubble** (`--bubble-in`, Dark: #26262a): das iMessage-Grau
-  eingehender Nachrichten.
-
-### Semantisch (kein Akzent)
-- **Präsenz-Grün** (#34c759, Dark: #30d158): ausschließlich der 12px-Online-Dot
-  am Avatar (mit 2.5px `--bg`-Rand). Rein semantisches Signal — nie als
-  Akzent, Button- oder Flächenfarbe.
-- **Destruktiv-Rot** (`--destructive`, Dark: #ff453a): Fehlertexte und der
-  „Abmelden"-Plain-Button. Keine gefüllten roten Flächen.
+- **Grund** (`bg`): Body, App-Shell, Konversationsfläche. Der Nachrichtenstrom liegt direkt darauf.
+- **Panel** (`panel`): Seitenleiste, Sheets, gruppierte Inputs, Composer-Pille, Ring des Präsenz-Dots.
+- **Panel 2** (`panel-2`): Aktives Segment der Tab-Pille, Select-Optionen – eine Stufe heller als Panel, nie mehr.
+- **Panel-Glas** (`panel-translucent`): Chat-Header, Composer, Auth-Karte und Composer-Fehler – immer mit `backdrop-filter: blur() saturate()`.
+- **Glas** (`glass`): Fremde Bubbles, Tab-Pillen-Hintergrund, Hover von Listeneinträgen und Icon-Buttons, deaktivierte Buttons.
+- **Glas stark** (`glass-strong`): Avatar-Standardfläche (wird per Skript vom persönlichen Farbton überschrieben).
+- **Label** (`label`): Primärtext, Titel, Bubble-Text, ID-Code.
+- **Sekundär** (`secondary`): Tagline, Vorschau, Hinweise, Status, Sender-Name, Divider-Label, Placeholder, Icon-Buttons im Ruhezustand, Original-Text.
+- **Tertiär** (`tertiary`): Zeitstempel in der Liste, Select-Chevron, Empty-State-Icon, deaktivierter Button-Text. Nur eine Nuance unter Sekundär – für Elemente, die zurücktreten, aber nicht verschwinden.
+- **Hairline** (`border`): Standard-Border von Karten, Bars, Bubbles, Divider-Linien, Trenner in gruppierten Inputs, Scrollbar-Thumb-Umfeld.
+- **Hairline stark** (`border-strong`): Composer-Pille, Sheet-Rand, Avatar-Standardring, Segment-Aktiv-Ring, Sheet-Handle, Scrollbar-Thumb, Spinner-Bahn.
+- **Destruktiv** (`destructive`): Fehlertexte, Composer-Fehler-Border (40 %), „Abmelden“-Button und dessen Hover (12 %).
 
 ### Named Rules
-**Die Ein-Akzent-Regel.** systemBlue ist die einzige Akzentfarbe der Welt.
-Grün existiert nur als Präsenz-Dot, Rot nur als Fehler/Destruktiv-Text. Eine
-zweite Akzentfarbe einzuführen bricht die Welt.
+**Die Eine-Stimme-Regel.** Grün ist der einzige Akzent. Es gibt keinen zweiten Farbton für Info, Warnung oder Sekundärhandlungen; Rot erscheint nur für Fehler und Abmelden. Was nicht grün ist, ist grau oder Glas.
 
-**Die Avatar-Hue-Regel.** Avatare sind der einzige Ort freier Farbe: Der Hue
-wird deterministisch aus dem Namen gehasht und als Verlauf
-`linear-gradient(150deg, hsl(H 72% 58%), hsl(H+42 72% 42%))` gemalt — pro
-Person stabil, nie manuell gewählt, nie außerhalb von Avataren verwendet.
+**Die Dunkel-auf-Grün-Regel.** Auf gefülltem Grün steht immer `on-brand` (#0b1f16), nie Weiß. Grüner Text steht nur auf dunklem Grund oder grünem Glas.
+
+**Die Hairline-Regel.** Kanten entstehen aus Weiß-Alpha (.09 Standard, .16 betont), nie aus einer opaken Graustufe. Grün getönte Flächen bekommen die grüne Hairline (.38).
+
+**Die Grün-ist-Signal-Regel.** Präsenz-Dot, Tipp-Punkte, „tippt …“-Status und die tippende Listenvorschau sind grün. Grün als Zustand bedeutet: hier passiert gerade etwas.
 
 ## Typography
 
-**Display/Body Font:** SF-Systemstack (`-apple-system, BlinkMacSystemFont,
-"SF Pro Text", "Segoe UI", Roboto, "Helvetica Neue", sans-serif`) — eine
-einzige Familie für alles, mit `-webkit-font-smoothing: antialiased`.
+**Display/Body Font:** Inter (selbst gehostet, variable woff2 400–700, OFL) mit Systemstack-Fallback (-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Helvetica Neue, sans-serif)
+**Label/Mono Font:** ui-monospace, SF Mono, Menlo, Consolas – nur für den ID-Code
 
-**Character:** Die native Systemschrift der Plattform; Persönlichkeit entsteht
-über Gewicht und negatives Tracking der Titel, nicht über eine zweite Familie.
+**Character:** Kompakter Werkzeug-Satz. Eine Familie, eine Achse (Gewicht 400–600), Titel mit leicht negativem Tracking, alles knapp gesetzt; der Monospace-Code ist der einzige typografische Fremdkörper und genau deshalb das Identitätsobjekt.
 
 ### Hierarchy
-- **Large Title** (700, 34px, letter-spacing -0.02em): genau einmal pro
-  Screen — „Chats" über der Liste; „InterChat" auf der Auth-Karte (28px).
-- **Title** (700, 20px, -0.01em): Sheet-Überschriften.
-- **Headline** (600, 17px, -0.01em): Chat-Namen in der Liste; verwandt:
-  Peer-Name im Header (16.5px/600), Profilname (19px/600).
-- **Body** (400, 16px, lh 1.35): Nachrichtentext, Eingaben, Buttons (dort 600).
-- **Subhead** (400, 15px): Nachrichten-Vorschau, Taglines, Platzhaltertexte.
-- **Footnote** (400, 13–14px, `--secondary`): Peer-Status, Zeitstempel,
-  Sheet-Hinweise, Fehlertexte.
-- **Caption** (600, 12px): Zeit-Divider, Absendername in Gruppen,
-  Statuszeile („Zugestellt"/„Gelesen"); die ID-Karten-Beschriftung zusätzlich
-  uppercase mit +0.06em.
+- **Headline** (600, 22 px, −0.02 em): Listentitel „Chats“ (Klasse `.large-title` – Apple-Name, Supabase-Maß). Verwandte: Auth-Titel (24 px), Placeholder-Titel (20 px, −0.01 em).
+- **Title** (600, 17 px, −0.01 em): Sheet-Überschriften, Profilname in den Einstellungen.
+- **Name** (600, 15 px, −0.01 em): Peer-Name im Header; Listen-Name 14.5 px; Lookup-Name 14.5 px.
+- **Body** (400, 15 px, 1.4): Nachrichtentext in Bubbles und Composer-Eingabe. Bubbles laufen maximal `min(72%, 520px)` breit (mobil 84 %).
+- **UI** (500, 14 px): Grundgröße von `html` (14 px); Buttons, Inputs, Segment-Labels (13 px), Vorschau (13 px), Hinweise (13 px), Tagline.
+- **Label** (500, 12 px, `tabular-nums`): Zeit-Divider, Listen-Zeitstempel, Status „Zugestellt/Gelesen“, Sender-Name, Original-Toggle, Peer-Status (12.5 px), Unread-Badge (11.5 px, 600).
+- **Mono** (600, 24 px, +0.08 em): ausschließlich der InterChat-ID-Code, `user-select: all`.
 
 ### Named Rules
-**Die Tabular-Regel.** Alles Zählbare — Zeiten, Unread-Badges, die
-InterChat-ID — läuft in `font-variant-numeric: tabular-nums`.
+**Die Kompakt-Regel.** 14 px ist die Grundgröße, 15 px ist für das, was gelesen wird (Nachrichten, Eingabe). Nichts in der Shell wird größer als 24 px.
 
-**Die Ein-Familien-Regel.** Es gibt keine zweite Schriftfamilie, keinen
-Webfont, kein Mono-Display. Hierarchie entsteht aus 400/500/600/700 und
-negativem Tracking ab 17px.
+**Die Tabellenziffern-Regel.** Jede Zeit- und Zahlenangabe (Divider, Listen-Zeit, Badge) trägt `font-variant-numeric: tabular-nums`.
+
+**Die Ein-Fremdkörper-Regel.** Monospace erscheint nur für die ID. Kein zweiter Code-Kontext, kein Monospace für Zeiten oder Status.
 
 ## Layout
 
-Zweispaltige Master-Detail-Anordnung in einem zentrierten Rahmen von maximal
-1440px bei `height: 100dvh`: links die Seitenleiste (375px, min. 300px) auf
-`--bg` mit Hairline rechts, rechts die Konversation auf `--panel`. Bars
-(Chat-Header, Composer) sind transluzent und kleben an den Rändern; nur die
-Nachrichtenfläche und Listen scrollen.
+Zwei-Spalten-Shell auf `100dvh`, maximal 1440 px breit, zentriert, `overflow: hidden` – die Shell scrollt nie. Links die Seitenleiste (360 px, min. 300 px, Panel-Grund, Hairline rechts), rechts die Konversation (flex 1, Grund #121212). Innerhalb der Konversation gibt es genau einen Scroller: der Nachrichtenstrom (`.messages`), mit `padding: 72px 16px calc(84px + safe-area)` – Platz für die absolut positionierten Glas-Bars oben (Header, min. 56 px) und unten (Composer). Bubbles und Glow laufen unter beiden Bars hindurch.
 
-Unter 761px kollabiert das Layout: Die Liste füllt den Screen, die Konversation
-schiebt sich als eigener Screen darüber (`.mobile-chat-open` blendet die
-Seitenleiste aus, Back-Chevron erscheint links im Header). `env(safe-area-inset-bottom)`
-polstert Composer und Sheets; Sheets docken mobil unten an und werden ab 761px
-zu zentrierten Dialogen (max. 430px).
+Rhythmus auf 4-px-Basis mit den beobachteten Stufen 4 / 6 / 8 / 10 / 12 / 14 / 16 / 20 / 24 / 28 / 32. Listen-Einträge sind 9 × 10 px gepolstert mit 12 px Lücke zum Avatar; Bubbles stehen 3 px auseinander (2 px innerhalb einer Serie, 10 px beim Sprecherwechsel); Sheets stapeln ihre Kinder mit 14 px; Formulare mit 14 px. Der Composer sitzt auf `env(safe-area-inset-bottom)`.
 
-Spacing-Rhythmus: 16px Außenpolster (Listenzeilen, Nachrichtenfläche
-horizontal 14px), 12px Element-Gaps (Avatar zu Text, Sheet-Innenleben 14px),
-8px kleine Gaps, 2px Bubble-Stapel — 10px erst beim Sprecherwechsel.
-Listenzeilen sind 44px-Avatar-hoch mit Hairline nur unter dem Textteil
-(iOS inset), die letzte Zeile ohne Linie.
+**Breakpoint 760 px.** Darunter stapelt die Shell: Seitenleiste vollflächig, Konversation ausgeblendet; `.app.mobile-chat-open` tauscht beides, der Zurück-Button (Chevron, grün) erscheint links im Header, der Placeholder verschwindet, Bubbles dürfen 84 % breit werden. Ab 761 px ist die Konversation immer sichtbar und Sheets werden zu zentrierten Dialogen (max. 430 px, 24 px Rand zum Viewport).
+
+Sheets sind auf beiden Größen 430 px breit und höchstens 86 dvh hoch (intern scrollend); die Auth-Karte 380 px.
 
 ## Elevation & Depth
 
-Flach per Default: Die Grundfläche kennt keine Schatten, Tiefe entsteht aus
-den zwei Flächentönen (`--bg` gegen `--panel`), Hairlines und dem
-Blur-Material der Bars. Schatten existieren nur an drei Stellen mit klarer
-Rolle: unter Overlays, unter dem aktiven Segment und unter dem App-Icon.
-Im Dark Mode werden die Schatten deutlich dichter (0.55–0.6 Alpha) statt
-farbiger.
+Hybrid aus tonaler Schichtung und Glas. In der Shell selbst gibt es keine Schatten: Tiefe entsteht durch die drei Gründe (#121212 → #181818 → #1f1f1f), durch Weiß-Alpha-Flächen und durch Glas-Bars, die den Nachrichtenstrom mit `blur(18px) saturate(1.4)` unter sich hindurchscheinen lassen. Grün ist die zweite Tiefenquelle: radiale Grün-Schleier sitzen am oberen Rand der Auth-Ansicht (18 %), in der Ecke des Listen-Headers (8 %), hinter dem Placeholder (8 %) und am unteren Rand des Nachrichtenstroms (6 %) – die Welt hat Licht, und das Licht ist grün.
+
+Klassische Schatten tragen nur Objekte, die die Ebene verlassen: Sheets, Pop-Dialoge, die Auth-Karte. Glows tragen Objekte, die Aufmerksamkeit erhalten: App-Icon, gehoverte Grün-Buttons, Präsenz-Dot, ID-Karte, die frisch gesendete Bubble.
 
 ### Shadow Vocabulary
-- **Sheet** (`--shadow-sheet: 0 -8px 40px rgba(0,0,0,0.18)`, Dark 0.6): nach
-  oben geworfen unter mobilen Bottom-Sheets.
-- **Pop** (`--shadow-pop: 0 10px 34px rgba(0,0,0,0.16)`, Dark 0.55):
-  Desktop-Dialoge.
-- **Segment aktiv** (`0 1px 4px rgba(0,0,0,0.12)`): das gehobene weiße
-  Segment im Segmented Control.
-- **App-Icon** (`0 6px 18px rgba(10,95,215,0.35)`): einziger farbiger
-  Schatten, nur unter dem Marken-Icon.
+- **Sheet** (`box-shadow: 0 -12px 48px rgba(0, 0, 0, 0.6)`): Bottom-Sheet auf Mobil – Schatten nach oben, weil das Sheet von unten kommt.
+- **Pop** (`box-shadow: 0 18px 56px rgba(0, 0, 0, 0.6), 0 0 0 1px var(--border)`): Desktop-Dialog; die 1-px-Hairline im Schatten ersetzt eine sichtbare Kante.
+- **Auth-Karte** (`box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5)`): Einzige schwebende Karte außerhalb der Shell.
+- **Glow** (`box-shadow: 0 0 40px var(--brand-glow)`, 20–28 px für Buttons/Bubble, 8 px für den Dot): Grünes Leuchten als Tiefe – nie ein Versatz, immer zentriert.
+- **ID-Karte** (`box-shadow: 0 0 40px rgba(62, 207, 142, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06)`): Leiser Glow plus Glas-Kante innen.
 
 ### Named Rules
-**Die Hairline-Regel.** Flächen werden durch 0.5px-Separatoren und Tonwechsel
-getrennt, nie durch Rahmen-Boxen oder Ruhe-Schatten. Schatten sind Overlays
-und gehobenen Zuständen vorbehalten.
+**Die Glas-über-Strom-Regel.** Header und Composer sind translucente Bars (`panel-translucent` + `blur(18px) saturate(1.4)`) und liegen absolut über dem einzigen Scroller. Der Inhalt scheint hindurch; die Bars werfen keinen Schatten.
 
-**Die Material-Regel.** Bars (Header, Composer) sind immer
-`--panel-translucent` + `backdrop-filter: blur(18px) saturate(1.6)` + Hairline
-an der Innenkante — nie opak, nie mit Schatten.
+**Die Kein-Versatz-Regel.** Schatten mit Versatz gibt es nur bei Sheets, Pop-Dialogen und der Auth-Karte. Alles innerhalb der Shell ist flach oder glüht.
+
+**Die Grünes-Licht-Regel.** Radiale Grün-Schleier (6–18 %) sind das Umgebungslicht der Welt. Sie sitzen an Rändern und Ecken, nie in der Mitte einer Lesefläche.
 
 ## Shapes
 
-Durchgehende iOS-Superellipsen-Anmutung über gestufte Radien: 9px für kleine
-Controls (Segmented, Kompakt-Buttons; Segmente innen 7px), 12px für gruppierte
-Eingaben, Buttons und Lookup-Karten, 14px für die ID-Karte, 16px für Sheets
-(mobil nur oben gerundet), 18px für Bubbles und das App-Icon, 19px für die
-Eingabe-Pille. Avatare, Icon-Buttons, Send-Button, Online-Dot und
-Typing-Punkte sind Vollkreise.
+Drei Arbeitsradien, klar nach Größe verteilt: **6 px** für alles Interaktive (Buttons, Icon-Buttons, Segment-Aktiv), **8 px** für Container, die Inhalte gruppieren (gruppierte Inputs, Tab-Pille, Listeneintrag, Lookup-Treffer, Composer-Fehler), **12 px** für Flächen, die Raum sind (Bubbles, Sheets, Auth-Karte, ID-Karte, App-Icon). Runde Objekte sind echte Kreise (Avatare, Sende-Kreis, Präsenz-Dot, Tipp-Punkte, Chip-Schließen), Chips sind 999-px-Pillen, die Composer-Eingabe ist eine 20-px-Pille, das Unread-Badge eine 10-px-Kapsel.
 
-Die Bubble-Grammatik schärft die stapelnahe Ecke: ausgehende Bubbles rechts
-unten, eingehende links unten auf 5px reduziert — der iMessage-„Schwanz" als
-Radius statt Anhängsel. Der Sheet-Handle (38×5px, 3px-Radius) markiert
-Bottom-Sheets. Keine spitzen Ecken irgendwo in der UI; Borders existieren nur
-als Hairline oder als 1px-Rand der Eingabe-Pille.
+Bubbles haben eine 4-px-Ecke an der Seite, aus der sie kommen (unten links für fremde, unten rechts für eigene) – der einzige asymmetrische Radius im System. Kanten sind immer 1-px-Hairlines aus Alpha, nie stärker; Bottom-Sheets lassen die untere Kante weg und tragen oben einen 36 × 4 px Handle. Icons sind stroked, 1.6–2.4 px Strich, runde Kappen, 24-Grid, `currentColor`.
+
+**Die 6/8/12-Regel.** Interaktiv 6, gruppierend 8, raumgebend 12. Kein Wert dazwischen, kein Wert darüber außer Kreisen und Pillen.
 
 ## Components
 
 ### Buttons
-- **Shape:** weiche Rechtecke (12px; kompakt 9px), volle Breite in Formularen.
-- **Filled:** `--accent` auf Weiß, 600, 13px Padding; Hover `--accent-pressed`,
-  Active `scale(0.98)`, Disabled `--fill-strong` mit `--secondary`-Text.
-- **Tinted:** `--tint`-Fläche mit `--accent`-Text; Hover `--fill-strong`.
-  Auf der blauen ID-Karte als Weiß-Alpha-Variante (0.22/0.34).
-- **Plain/Destructive:** ohne Fläche; destruktiv in `--destructive` mit
-  rotem 10%-Hover.
-- **Icon-Button:** 22px-Icon in Kreis-Hover (`--fill`), Akzentvariante
-  in `--accent`.
-- **Send-Button:** 34px-Kreis in `--accent` mit weißem Pfeil; Active
-  `scale(0.92)`, Disabled neutral.
+Ruhig, flächig, mit Kante statt Schatten. Alle Buttons teilen Inter 500 / 14 px, `padding: 10px 14px`, 1-px-Border und 6-px-Radius; Zustandswechsel in 0.15 s ease-out.
+- **Primär** (`btn-filled`): Grün-Füllung, dunkler Text, Tiefgrün-Border. Hover: Grün-Hover-Füllung + 24-px-Glow. Active: `scale(0.985)`. Disabled: Glas-Fläche, tertiärer Text, Hairline.
+- **Getönt** (`btn-tinted`): Grün-Glas mit grünem Text und grüner Hairline; Hover Grün-Glas stark. Sekundäre Handlung (Empty-State, „Kopieren“). Kompakt-Variante `btn-compact`: `padding: 6px 10px`, 13 px, auto-breit.
+- **Plain destruktiv** (`btn-plain.destructive`): Kein Hintergrund, roter Text; Hover 12 % Rot-Glas. Nur „Abmelden“.
+- **Icon-Button** (`icon-btn`): 7 px Polster, transparent, sekundärer Icon-Ton; Hover Glas + Hairline + Label-Ton. `.accent`: grünes Icon, Hover Grün-Glas + Grün-Hairline (Compose, Zurück, Mitglied hinzufügen, Plus).
+- **Sende-Kreis** (`send-btn`): 36 px Kreis, Grün-Füllung, Tiefgrün-Border, Pfeil-nach-oben 18 px. Hover Glow 20 px, Active `scale(0.92)`, Disabled Glas.
+- **Fokus:** systemweit `outline: 2px solid var(--brand)`, Offset 2 px, Radius 4 px; Listeneinträge ziehen den Ring nach innen (−2 px).
 
 ### Segmented Control
-- **Style:** `--fill`-Wanne (9px, 2px Padding), Segmente 14px/500; das aktive
-  Segment liegt als `--panel`-Fläche (7px) mit Segment-Schatten oben und
-  wechselt auf 600.
-
-### Message Bubbles (Signature)
-- **Geometrie:** max. `min(72%, 520px)` (mobil 82%), 8px/13px Padding, 18px
-  Radius mit 5px-Stapelecke, `white-space: pre-wrap`.
-- **Ausgehend:** 178deg-Verlauf `--bubble-out` → `--bubble-out-deep`, weißer
-  Text, rechtsbündig.
-- **Eingehend:** `--bubble-in` mit `--label`-Text, linksbündig.
-- **Rhythmus:** 2px zwischen gleichen Sprechern, 10px beim Wechsel; in
-  Gruppen 12px-Absendername über fremden Bubbles.
-- **Übersetzung:** „Original anzeigen"-Toggle (12px, 75% Opazität) klappt den
-  Originaltext hinter einer currentColor-Hairline (`color-mix` 30%) auf —
-  funktioniert dadurch in beiden Bubble-Farben und beiden Themes.
-- **Bubbles sind stumm:** keine Uhrzeit in der Bubble. Zeit erscheint als
-  zentrierter Divider (12px/600, tabular) bei Tageswechsel oder >1h Pause;
-  „Zugestellt"/„Gelesen" steht nur unter der letzten eigenen Nachricht.
-
-### Composer
-- **Style:** transluzente Bar mit Hairline oben; Eingabe-Pille (19px, 1px
-  `--separator`-Rand auf `--panel`), Fokus färbt den Rand `--accent` —
-  kein Glow. Rechts der Send-Kreis.
-
-### Chat List Item
-- **Style:** 44px-Avatar mit Verlauf (+ ggf. Online-Dot), Name 17px/600 gegen
-  14px-Zeit in `--secondary`, darunter 15px-Vorschau (einzeilig, Ellipsis)
-  gegen blauen Unread-Badge (21px, 11px-Radius). Hover `--fill`, aktiv
-  `--tint`; „tippt…" färbt die Vorschau `--accent`.
+Supabase-Tab-Pille: Glas-Fläche mit Hairline, 8-px-Radius, 3 px Innenabstand. Segmente sind 6-px-Radius, 13 px / 500, sekundärer Text; Hover Label-Ton; Aktiv Panel-2-Füllung mit 1-px-Ring aus Hairline stark. Rolle: Anmelden/Registrieren, Direkt/Gruppe.
 
 ### Inputs / Fields
-- **Style:** iOS inset-grouped — randlose 16px-Inputs in einer `--panel`-Gruppe
-  (12px), getrennt durch Hairlines; Fokus hinterlegt die Zeile mit `--tint`
-  statt Ring. Select-Zeilen: Label links, `--accent`-Wert rechts mit
-  `--tertiary`-Chevron.
-- **Fehler:** 13–14px-Text in `--destructive` unter der Gruppe, per
-  `role="alert"`.
+- **Gruppierte Inputs** (`grouped`): Panel-Fläche, Hairline, 8-px-Radius, `overflow: hidden`; Felder ohne eigenen Rand, `padding: 11px 14px`, 14 px, durch Hairlines getrennt. Fokus: kein Outline, stattdessen Grün-Glas-Hintergrund. Placeholder sekundär. Zeilen mit Select (`select-row`): Label links, Select rechtsbündig in Grün mit tertiärem Chevron.
+- **Composer-Pille** (`#message-input`): Panel-Fläche, Hairline stark, 20-px-Radius, 15 px, `padding: 10px 16px`. Fokus: Grün-Border + 3-px-Halo aus Grün-Glas.
+- **Fehler:** 13 px Rot unter dem Feld, `min-height: 18px` reserviert (kein Springen). Composer-Fehler als schwebende Glas-Pille über dem Composer (Rot 40 % Border, 8-px-Radius, 4 s sichtbar).
+- **Caret und Auswahl** sind grün.
 
-### Sheets
-- **Style:** `--bg`-Fläche, 16px-Radius, Handle, Titelzeile mit X-Icon-Button,
-  14px-Stack. Mobil als Bottom-Sheet (max-height 86dvh, Sheet-Schatten) über
-  40%-Schwarz-Backdrop; ab 761px zentrierter Dialog mit Pop-Schatten.
+### Cards / Containers
+- **Auth-Karte:** 380 px, Panel-Glas mit `blur(16px) saturate(1.3)`, Hairline, 12-px-Radius, `padding: 32px 28px 28px`, tiefer Schatten. Darüber das App-Icon (64 px, Grün-Glas, Grün-Hairline, 40-px-Glow, Bubbles-Icon 42 px).
+- **ID-Karte** (`id-card`): Das Identitätsobjekt. Grün-Glas mit radialem Grün-Schleier (22 %) in der linken oberen Ecke, Grün-Hairline, 12-px-Radius, 16 px Polster, leiser Glow + innere Glas-Kante. Kopfzeile 11.5 px / 600 / Versalien / +0.08 em in Grün (nur hier), Code in Mono 24 px, „Kopieren“ als kompakter getönter Button, Hinweis in Grün-zu-Label-Mischung (55 %).
+- **Lookup-Treffer** (`lookup-result`): Grün-Glas, Grün-Hairline, 8-px-Radius, Avatar + Name (14.5 / 600) + Sub (12.5, sekundär).
+- **Sheets** (`sheet`): Panel-Fläche, Hairline stark, 430 px, Kinder mit 14 px Abstand, Kopfzeile Title 17 px + Icon-Schließen. Mobil: von unten, `border-radius: 12px 12px 0 0`, Handle, Sheet-Schatten, `sheet-up 0.4s cubic-bezier(0.16, 1, 0.3, 1)`. Desktop (≥ 761 px): zentriert, 12 px rundum, Pop-Schatten, `sheet-pop 0.28s` (28 px hoch + `scale(0.98)` + Fade). Backdrop: 55 % Schwarz mit `blur(4px)`, 0.3 s eingeblendet.
 
-### ID-Karte (Signature, Snapchat-Hauch)
-- Blauer Marken-Verlauf `linear-gradient(150deg, #1e6fe0, #0a4fae)` (14px,
-  weißer Text): Uppercase-Caption, die ID in 25px/700 mit +0.08em und
-  `user-select: all`, Weiß-Alpha-Kopierbutton, Hinweiszeile. Der einzige Ort
-  neben App-Icon und Avataren, an dem ein Verlauf Fläche trägt.
+### Chips
+- **Member-Chip:** Grün-Glas, grüner Text, Grün-Hairline, 999-px-Pille, `padding: 4px 6px 4px 12px`, 13 px / 500; Schließen-Kreuz als runder Button, Hover Grün-Glas stark.
+- **Unread-Badge:** Grün-Füllung, dunkler Text, 11.5 px / 600, 20 px hoch, min. 20 px breit, 10-px-Radius, Tabellenziffern.
 
-### Icons
-- Ein Inline-SVG-Sprite (`<symbol>`/`<use>`), 24er-ViewBox, stroked in
-  `currentColor` mit 1.6–2.4 Strichstärke, runde Kappen — SF-Symbols-Anmutung.
-  Verwendungsgrößen 16–24px (Empty-State 44px). Keine Füllflächen, keine
-  Icon-Fonts, keine Emoji als UI-Glyphen.
+### Navigation
+- **Listen-Header:** Panel mit Grün-Schleier (8 %) in der linken oberen Ecke, Hairline unten, `padding: 12px 16px 8px`. Zeile: eigener Avatar (32 px, öffnet Einstellungen) links, Compose-Icon grün rechts; darunter Headline „Chats“.
+- **Listeneintrag** (`chat-item`): Volle Breite, 8-px-Radius, transparente Border, `padding: 9px 10px`, Avatar 40 px + Name (14.5 / 600) + Vorschau (13, sekundär) + Zeit (12, tertiär, tabular). Hover: Glas + Hairline. Aktiv: Grün-Glas + Grün-Hairline, Zeit in Grün-Label-Mischung. Tippende Vorschau grün.
+- **Chat-Header:** Absolut, Panel-Glas + Blur, Hairline unten, min. 56 px, `padding: 8px 52px`. Peer-Avatar 36 px, Name (15 / 600) und Status (12.5, sekundär; „tippt …“ grün) zentriert. Zurück (mobil) links, Mitglied hinzufügen (Gruppen) rechts, jeweils grüne Icon-Buttons.
+- **Empty-State:** Bubbles-Icon 44 px tertiär, Text sekundär, getönter Button; sitzt 12 vh unter dem Header.
 
-### Motion
-- **Feder-Ease:** `cubic-bezier(0.16, 1, 0.3, 1)` für alles Expressive;
-  Zustandswechsel (Hover, Fokus) laufen in 0.12–0.15s `ease-out`.
-- **Senden (Signature):** die neue Bubble startet per FLIP an der realen
-  Position der Eingabe-Pille (`--send-dx`/`--send-dy` aus
-  `getBoundingClientRect`) und federt in 0.38s an ihren Platz
-  (leichter Overshoot bei 70%). Empfangen: 0.28s aus 8px/scale 0.94.
-- **Sheets:** mobil 0.4s von unten (`sheet-up`), Desktop 0.28s Pop; Backdrop
-  dimmt in 0.3s auf 40%.
-- **Ambient:** Typing-Punkte pulsieren 1.2s versetzt; Lade-Spinner 0.8s linear.
-- **`prefers-reduced-motion: reduce`** schaltet Bubble- und Sheet-Animationen
-  vollständig ab.
+### Avatare
+Dunkle Fläche, persönlicher Farbton in Initialen und Ring. Kreis, Inter 600, Versalien, `letter-spacing: 0.01em`; 32 / 40 / 56 px (Header-Peer 36 px). Standard: Glas stark + Hairline stark + grüne Initialen. Das Skript hasht `user:<id>` bzw. `group:<id>` auf einen Hue (0–359) und setzt `hsl(h 28% 16%)` als Fläche, `hsl(h 45% 34%)` als Ring, `hsl(h 75% 72%)` als Initialen – Sättigung und Helligkeit sind fix, nur der Farbton wandert. Präsenz-Dot: 11 px Grün, 2-px-Ring in Panel, 8-px-Glow, unten rechts.
 
-**Die Feder-Regel.** Expressive Bewegung nutzt ausschließlich
-`cubic-bezier(0.16, 1, 0.3, 1)` und respektiert `prefers-reduced-motion`.
-Nichts bounct mit anderen Kurven.
+### Bubbles (Signature)
+Glas statt Farbe. Beide Richtungen: 12-px-Radius mit 4-px-Ecke am Ursprung, `padding: 9px 13px`, 15 px / 1.4, `backdrop-filter: blur(6px)`, `pre-wrap`.
+- **Fremd** (`bubble.in`): Glas (Weiß 5 %) + Hairline, linksbündig. Darüber in Gruppen der Sender-Name (12, sekundär, 12 px eingerückt).
+- **Eigen** (`bubble.out`): Grün-Glas + Grün-Hairline, rechtsbündig.
+- **Original-Toggle:** grüner Textbutton 12 px mit Globus-Icon 13 px; ausgeklappter Originaltext 13.5 px sekundär hinter einer Hairline. Übersetzungs-Fehlhinweis 12 px sekundär.
+- **Status:** „Gesendet/Zugestellt/Gelesen“ 12 px / 500 sekundär, rechtsbündig, nur unter der letzten eigenen Nachricht.
+- **Zeit-Divider:** Hairline – Label (12 / 500, sekundär, tabular) – Hairline, `margin: 12px 0 6px`; erscheint bei Tageswechsel oder > 60 min Pause. Bubbles tragen keine Uhrzeit.
+- **Tipp-Indikator:** drei 7-px-Grün-Punkte, `typing-pulse` 1.2 s, Versatz 0.15 s.
+- **Laden:** 26-px-Ring, Bahn Hairline stark, Kopf Grün, 0.8 s.
+- **Senden (FLIP):** Das Skript misst Eingabe-Pille und neue Bubble und setzt `--send-dx/--send-dy`; `bubble-send` (0.42 s, `cubic-bezier(0.16, 1, 0.3, 1)`, Origin unten rechts) fährt von dort mit `scale(0.9)` / 50 % Deckung ein, glüht bei 55 % mit 28 px Grün und überschwingt bei 70 % um 2 px. **Empfangen:** `bubble-receive` 0.28 s, 8 px hoch + `scale(0.94)` + Fade, Origin unten links.
+- **Reduced Motion:** Bubble-Animationen, Sheet-Auffahrt und Backdrop-Dim sind unter `prefers-reduced-motion: reduce` abgeschaltet.
+
+### Motion-Grammatik
+Zustandswechsel (Farbe, Border, Glow): 0.12–0.2 s `ease-out`. Räumliche Bewegung (Bubble, Sheet, Pop): `cubic-bezier(0.16, 1, 0.3, 1)` – schneller Start, langer weicher Auslauf. Druck: `scale(0.985)` (Buttons) bzw. `scale(0.92)` (Sende-Kreis).
 
 ## Do's and Don'ts
 
 ### Do:
-- **Do** jede Farbe über die `:root`-Custom-Properties beziehen — jeder Token
-  hat einen Dark-Zwilling; neue Werte brauchen beide Definitionen.
-- **Do** Hairlines mit 0.5px und `--separator` ziehen und Listen im
-  inset-Stil führen (Linie nur unter dem Textteil, letzte Zeile ohne).
-- **Do** neue Icons als stroked `<symbol>` im Sprite anlegen (24er-ViewBox,
-  1.6–2.4 Strich, `currentColor`, runde Kappen).
-- **Do** Interaktives blau markieren: Flächen `--accent`, Nebenaktionen
-  `--tint`, Zustände über `--fill`/`--fill-strong`.
-- **Do** Zeiten, IDs und Zähler in `tabular-nums` setzen.
-- **Do** neue Overlays als Sheet bauen: Handle, Titelzeile mit X, mobil von
-  unten, ab 761px als zentrierter Pop.
+- **Do** jede neue Fläche aus den drei Gründen (#121212 / #181818 / #1f1f1f) oder aus Weiß-Alpha (`glass` .05, `glass-strong` .09) bauen und mit einer 1-px-Hairline (.09 / .16) begrenzen.
+- **Do** Grün-Glas (`brand-tint` + `brand-line`) für alles verwenden, das „meins“ oder „ausgewählt“ ist: eigene Bubbles, aktiver Eintrag, Chips, ID-Karte.
+- **Do** auf jede Grün-Füllung `on-brand` (#0b1f16) als Text setzen und die Füllung mit `brand-deep` einfassen.
+- **Do** schwebende Bars als `panel-translucent` mit `blur(18px) saturate(1.4)` über den Scroller legen; der Inhalt darf durchscheinen.
+- **Do** die 6/8/12-Regel halten: interaktiv 6, gruppierend 8, raumgebend 12; Kreise für Avatare/Dots/Sende-Kreis, 999 px für Chips.
+- **Do** Icons aus dem stroked Sprite (`<use href="#i-…">`) ziehen, in `currentColor`, 1.6–2.4 px Strich.
+- **Do** Tiefe über Grün-Glow (`0 0 20–40px var(--brand-glow)`) und radiale Grün-Schleier (6–18 %) erzeugen, Versatz-Schatten nur für Sheets, Dialoge und die Auth-Karte.
+- **Do** räumliche Bewegung mit `cubic-bezier(0.16, 1, 0.3, 1)` und jede Animation hinter `prefers-reduced-motion` absichern.
+- **Do** Zeiten und Zahlen in `tabular-nums` setzen; Fehlerzeilen mit `min-height: 18px` reservieren.
 
 ### Don't:
-- **Don't** eine zweite Akzentfarbe einführen — Grün bleibt Präsenz-Dot,
-  Rot bleibt Fehler/Destruktiv.
-- **Don't** Karten mit Ruhe-Schatten oder sichtbaren Rahmen bauen; Tiefe
-  gehört Overlays und gehobenen Zuständen.
-- **Don't** Uhrzeiten in Bubbles schreiben oder Status unter jede Nachricht
-  setzen — Zeit-Divider und einmaliger Status sind die Grammatik.
-- **Don't** Verläufe als Flächenfarbe streuen: Verlauf gibt es nur an
-  Avataren (Hue-Hash), ausgehenden Bubbles, App-Icon und ID-Karte.
-- **Don't** Webfonts, Icon-Fonts oder gefüllte Glyphen laden — SF-Stack und
-  das stroked Sprite sind die einzige Schrift- und Zeichensprache.
-- **Don't** Animationen ohne `prefers-reduced-motion`-Fallback ausliefern.
+- **Don't** einen hellen Modus, `prefers-color-scheme: light` oder helle Flächen einführen – die Welt ist `color-scheme: dark`, ohne Ausnahme.
+- **Don't** einen zweiten Akzent (Blau, Orange, Violett) für Info, Warnung oder Sekundärhandlungen anlegen; Rot (#ff6b6b) bleibt Fehler und Abmelden.
+- **Don't** Weiß auf gefülltem Grün setzen.
+- **Don't** Avatare als bunte Scheiben füllen – der persönliche Hue lebt nur in Initialen (`hsl(h 75% 72%)`) und Ring (`hsl(h 45% 34%)`) auf dunkler Fläche (`hsl(h 28% 16%)`).
+- **Don't** Bubbles mit Uhrzeit versehen oder deckend einfärben; Zeit gehört in den Divider, Bubbles sind Glas.
+- **Don't** opake Graustufen als Kante, Versatz-Schatten in der Shell oder Schatten unter Bars verwenden.
+- **Don't** gefüllte Glyph-Icons, Emoji-Icons oder Icon-Fonts einsetzen.
+- **Don't** Monospace außerhalb des ID-Codes oder Schriftgrößen über 24 px in der Shell verwenden.
+- **Don't** einen zweiten Scroller in der Konversation anlegen – nur der Nachrichtenstrom scrollt.
