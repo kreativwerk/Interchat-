@@ -21,7 +21,7 @@
   --glass-strong: rgba(255, 255, 255, 0.09);
   --label: #fafafa;
   --secondary: #a3a3a3;
-  --tertiary: #858585;
+  --tertiary: #939393;
   --border: rgba(255, 255, 255, 0.09);
   --border-strong: rgba(255, 255, 255, 0.16);
   --shadow-sheet: 0 -12px 48px rgba(0, 0, 0, 0.6);
@@ -33,7 +33,7 @@
 html, body {
   margin: 0;
   height: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, Inter, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
   background: var(--bg);
   color: var(--label);
   -webkit-font-smoothing: antialiased;
@@ -86,7 +86,7 @@ button { font-family: inherit; color: inherit; }
   width: 64px;
   height: 64px;
   margin: 0 auto 16px;
-  border-radius: 14px;
+  border-radius: 12px;
   background: var(--brand-tint);
   border: 1px solid var(--brand-line);
   color: var(--brand);
@@ -356,6 +356,7 @@ button { font-family: inherit; color: inherit; }
 .chat-item:hover { background: var(--glass); border-color: var(--border); }
 .chat-item.active { background: var(--brand-tint); border-color: var(--brand-line); }
 .chat-item:focus-visible { outline-offset: -2px; }
+.chat-item.active .chat-item-time { color: color-mix(in srgb, var(--brand) 55%, var(--label)); }
 
 .avatar-wrap { position: relative; }
 
@@ -455,7 +456,7 @@ button { font-family: inherit; color: inherit; }
 .chat-placeholder h2 { color: var(--label); font-weight: 600; margin: 14px 0 6px; letter-spacing: -0.01em; font-size: 20px; }
 .chat-placeholder p { max-width: 340px; font-size: 14px; margin: 0; }
 
-.chat-active { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.chat-active { flex: 1; display: flex; flex-direction: column; min-height: 0; position: relative; }
 
 .chat-header {
   display: flex;
@@ -466,7 +467,10 @@ button { font-family: inherit; color: inherit; }
   backdrop-filter: blur(18px) saturate(1.4);
   -webkit-backdrop-filter: blur(18px) saturate(1.4);
   border-bottom: 1px solid var(--border);
-  position: relative;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
   z-index: 2;
   min-height: 56px;
 }
@@ -497,10 +501,11 @@ button { font-family: inherit; color: inherit; }
 }
 .peer-status.typing { color: var(--brand); }
 
+/* Der einzige Scroller – Bubbles und Glow laufen unter den Glas-Bars hindurch */
 .messages {
   flex: 1;
   overflow-y: auto;
-  padding: 16px 16px 10px;
+  padding: 72px 16px 84px;
   display: flex;
   flex-direction: column;
   gap: 3px;
@@ -510,16 +515,22 @@ button { font-family: inherit; color: inherit; }
 }
 
 .day-divider {
-  align-self: center;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
   color: var(--secondary);
   font-size: 12px;
   font-weight: 500;
-  padding: 6px 10px;
-  margin: 10px 0 6px;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  background: var(--glass);
+  margin: 12px 0 6px;
   font-variant-numeric: tabular-nums;
+}
+
+.day-divider::before, .day-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
 }
 
 .sender-name {
@@ -637,11 +648,20 @@ button { font-family: inherit; color: inherit; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .composer-error {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: calc(64px + env(safe-area-inset-bottom));
+  z-index: 3;
   font-size: 13px;
   color: var(--destructive);
   text-align: center;
-  padding: 6px 12px 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--destructive) 40%, transparent);
   background: var(--panel-translucent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .typing-row { align-self: flex-start; display: flex; gap: 4px; padding: 10px 14px; }
@@ -657,6 +677,11 @@ button { font-family: inherit; color: inherit; }
 /* Eingabezeile */
 
 .composer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -762,6 +787,7 @@ button { font-family: inherit; color: inherit; }
     from { transform: translateY(28px) scale(0.98); opacity: 0; }
     to { transform: translateY(0) scale(1); opacity: 1; }
   }
+  .sheet-handle { display: none; }
 }
 
 .sheet-handle {
@@ -835,7 +861,7 @@ button { font-family: inherit; color: inherit; }
     radial-gradient(80% 100% at 0% 0%, rgba(62, 207, 142, 0.22), transparent 65%),
     var(--brand-tint);
   border: 1px solid var(--brand-line);
-  border-radius: 10px;
+  border-radius: 12px;
   padding: 16px;
   color: var(--label);
   box-shadow: 0 0 40px rgba(62, 207, 142, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.06);
@@ -854,7 +880,7 @@ button { font-family: inherit; color: inherit; }
   user-select: all;
 }
 
-.id-card-hint { font-size: 12.5px; margin-top: 10px; color: var(--secondary); line-height: 1.4; }
+.id-card-hint { font-size: 12.5px; margin-top: 10px; color: color-mix(in srgb, var(--brand) 55%, var(--label)); line-height: 1.4; }
 
 /* -------------------------------------------------------------------- Mobil */
 

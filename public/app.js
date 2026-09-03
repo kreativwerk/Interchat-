@@ -314,7 +314,8 @@ async function openChat(conversationId) {
   renderMessages();
   markRead();
   renderChatList();
-  $('message-input').focus();
+  // Mobil keine Tastatur aufspringen lassen – erst der Verlauf, dann tippen.
+  if (!matchMedia('(max-width: 760px)').matches) $('message-input').focus();
 }
 
 function closeChat() {
@@ -547,10 +548,12 @@ $('composer').addEventListener('submit', (e) => {
     ensureDivider(res.message);
     const fragment = buildBubble(res.message, { animate: true });
     messagesEl.appendChild(fragment);
+    appendStatusRow();
+    // Erst scrollen, dann messen – sonst startet die Bubble in langen
+    // Chats unterhalb der Pille statt aus ihr.
+    messagesEl.scrollTop = messagesEl.scrollHeight;
     const bubble = messagesEl.querySelector(`[data-message-id="${res.message.id}"]`);
     if (bubble) animateFromComposer(bubble);
-    appendStatusRow();
-    messagesEl.scrollTop = messagesEl.scrollHeight;
     loadChats();
   });
 });
