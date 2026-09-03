@@ -116,7 +116,13 @@ async function myMemoryTranslate(text, from, to) {
       encodeURIComponent(chunk) +
       '&langpair=' +
       encodeURIComponent(`${from}|${to}`);
-    const res = await fetch(url);
+    // Rate-Limit (429) mit kurzem Backoff abfangen, statt sofort aufzugeben.
+    let res;
+    for (let attempt = 0; ; attempt++) {
+      res = await fetch(url);
+      if (res.status !== 429 || attempt >= 3) break;
+      await new Promise((r) => setTimeout(r, 2000 * 2 ** attempt));
+    }
     if (!res.ok) throw new Error(`MyMemory HTTP ${res.status}`);
     const data = await res.json();
     let out = data?.responseData?.translatedText;
