@@ -58,6 +58,8 @@ async function waitForServer() {
 
 async function run() {
   const suffix = Date.now().toString(36);
+  // Sätze pro Lauf variieren – MyMemory drosselt wiederholte identische Segmente.
+  const n = 10 + (Date.now() % 50);
   const reg = (u, lang, name) => api('/api/register', {
     method: 'POST',
     body: JSON.stringify({ username: `${u}_${suffix}`, password: 'geheim123', displayName: name, language: lang }),
@@ -88,7 +90,7 @@ async function run() {
   }, anna.token)).conversation;
 
   const bobGets = once(sBob, 'message:new');
-  const ack = await send(sAnna, direct.id, 'Hallo Bob, wie geht es dir heute?');
+  const ack = await send(sAnna, direct.id, `Hallo Bob, wie geht es dir heute um ${n} Uhr?`);
   if (ack.error) throw new Error('send: ' + ack.error);
   const bobMsg = (await bobGets).message;
   if (!bobMsg.translation?.translated) throw new Error('Direktnachricht nicht übersetzt');
@@ -116,7 +118,7 @@ async function run() {
 
   const bobGroup = once(sBob, 'message:new', (p) => p.message.conversationId === group.id);
   const carlaGroup = once(sCarla, 'message:new', (p) => p.message.conversationId === group.id);
-  await send(sAnna, group.id, 'Lasst uns nächste Woche ans Meer fahren!');
+  await send(sAnna, group.id, `Lasst uns in ${n} Tagen ans Meer fahren!`);
   const [bg, cg] = await Promise.all([bobGroup, carlaGroup]);
   if (!bg.message.translation?.translated || !cg.message.translation?.translated) throw new Error('Gruppen-Übersetzung fehlt');
   if (bg.message.senderName !== 'Anna') throw new Error('senderName fehlt');

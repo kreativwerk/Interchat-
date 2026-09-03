@@ -120,8 +120,8 @@ async function myMemoryTranslate(text, from, to) {
     let res;
     for (let attempt = 0; ; attempt++) {
       res = await fetch(url);
-      if (res.status !== 429 || attempt >= 3) break;
-      await new Promise((r) => setTimeout(r, 2000 * 2 ** attempt));
+      if (res.status !== 429 || attempt >= 2) break;
+      await new Promise((r) => setTimeout(r, 700 * (attempt + 1)));
     }
     if (!res.ok) throw new Error(`MyMemory HTTP ${res.status}`);
     const data = await res.json();
@@ -163,6 +163,26 @@ async function translateRaw(text, from, to) {
   return { text: await myMemoryTranslate(text, from, to), provider: 'mymemory' };
 }
 
+// Persistenter Text-Cache: identische Phrasen (z. B. „Hallo", „Danke") werden
+// pro Sprachpaar nur ein einziges Mal beim Provider angefragt.
+db.exec(`
+  CREATE TABLE IF NOT EXISTS translation_cache (
+    src_lang   TEXT NOT NULL,
+    dst_lang   TEXT NOT NULL,
+    text       TEXT NOT NULL,
+    translated TEXT NOT NULL,
+    provider   TEXT NOT NULL,
+    created_at INTEGER NOT NULL,
+    PRIMARY KEY (src_lang, dst_lang, text)
+  )
+`);
+const getCachedText = db.prepare(
+  'SELECT translated, provider FROM translation_cache WHERE src_lang = ? AND dst_lang = ? AND text = ?'
+);
+const storeCachedText = db.prepare(
+  'INSERT OR IGNORE INTO translation_cache (src_lang, dst_lang, text, translated, provider, created_at) VALUES (?, ?, ?, ?, ?, ?)'
+);
+
 const getStoredTranslation = db.prepare(
   'SELECT text FROM translations WHERE message_id = ? AND lang = ?'
 );
@@ -193,6 +213,12 @@ async function translateMessage({ messageId = null, text, from, to }) {
     if (messageId != null) storeTranslation.run(messageId, dst, cached.text, cached.provider);
     return { text: cached.text, translated: true, failed: false };
   }
+  const persisted = getCachedText.get(src, dst, text);
+  if (persisted) {
+    memoryCache.set(key, { text: persisted.translated, provider: persisted.provider });
+    if (messageId != null) storeTranslation.run(messageId, dst, persisted.translated, persisted.provider);
+    return { text: persisted.translated, translated: true, failed: false };
+  }
 
   try {
     const result = await translateRaw(text, src, dst);
@@ -200,6 +226,7 @@ async function translateMessage({ messageId = null, text, from, to }) {
       memoryCache.delete(memoryCache.keys().next().value);
     }
     memoryCache.set(key, result);
+    storeCachedText.run(src, dst, text, result.text, result.provider, Date.now());
     if (messageId != null) storeTranslation.run(messageId, dst, result.text, result.provider);
     return { text: result.text, translated: true, failed: false };
   } catch (err) {

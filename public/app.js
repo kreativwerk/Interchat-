@@ -568,6 +568,8 @@ function connectSocket() {
       const prev = state.messages[state.messages.length - 2];
       messagesEl.querySelector('.message-status')?.remove();
       messagesEl.querySelector('.typing-row')?.remove();
+      // Live-Nachricht während des Ladens: Spinner weicht dem Inhalt.
+      messagesEl.querySelector('.messages-loading')?.remove();
       ensureDivider(message);
       messagesEl.appendChild(buildBubble(message, {
         animate: true,
