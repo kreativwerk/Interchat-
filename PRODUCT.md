@@ -24,12 +24,17 @@ Telefon und nebenbei am Desktop, bei jedem Umgebungslicht — hell wie dunkel.
 
 ## Brand Commitments (vom Nutzer gepinnt)
 
-- **Apple-lastige Designsprache**: native iOS-Anmutung (SF-Systemschrift,
-  iMessage-Bubble-Grammatik, translucente Bars, Hairline-Separatoren,
-  System-Blau als einziger Akzent, helles und dunkles Erscheinungsbild).
-- **Ein Hauch Snapchat**: die User-ID als spielerisches, teilbares
-  Identitätsobjekt in den Einstellungen; Avatare mit persönlicher Farbe.
+- **Supabase-Designsprache, durchgehend dunkel**: tiefdunkle Gründe
+  (#121212/#181818), Supabase-Grün #3ECF8E als einziger Akzent, Hairline-
+  Borders aus Weiß-Transparenz, **Transparenzen als Material** (Glas-Bars mit
+  Blur, grün getönte Flächen, weiche grüne Glows). Kein heller Modus.
+- **Ein Hauch Snapchat**: die User-ID als teilbares Identitätsobjekt in den
+  Einstellungen; Avatare mit personengebundenem Farbton, in Supabase-Material
+  (dunkle Fläche, getönte Initialen) übersetzt.
 - UI-Sprache: Deutsch.
+
+Historie: v1 war Apple-lastig (iOS-Systempalette, Light/Dark). Der Nutzer hat
+die Welt am 2026-09-03 auf Supabase-Dunkel gewechselt.
 
 ## Nicht verhandelbar
 

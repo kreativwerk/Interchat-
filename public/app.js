@@ -73,8 +73,11 @@ function hashHue(seed) {
 function paintAvatar(el, name, seed) {
   const hue = hashHue(seed ?? name);
   el.textContent = initials(name);
-  el.style.background =
-    `linear-gradient(150deg, hsl(${hue} 72% 58%), hsl(${(hue + 42) % 360} 72% 42%))`;
+  // Supabase-Material: dunkle, leicht getönte Fläche; der persönliche Farbton
+  // (Snapchat-Hauch) lebt in Initialen und Ring, nicht in einer bunten Fläche.
+  el.style.background = `hsl(${hue} 28% 16%)`;
+  el.style.borderColor = `hsl(${hue} 45% 34%)`;
+  el.style.color = `hsl(${hue} 75% 72%)`;
 }
 
 function paintChatAvatar(el, chat) {

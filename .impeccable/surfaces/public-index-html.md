@@ -10,36 +10,37 @@ related_targets: ["public/app.js","public/style.css"]
 Scope: gesamte SPA (Auth, Chatliste, Konversation, Sheets). Mode: Operate.
 Audience: private Nutzer über Sprachgrenzen; Job: lesen/antworten/Kontakte per
 User-ID hinzufügen/Gruppen führen. Constraints: kein Build-Schritt, Deutsch,
-hell + dunkel. Richtung vom Nutzer gepinnt (Apple-lastig, Hauch Snapchat) —
-kein Seed-Roll, Brief schlägt Würfel.
+nur dunkel. Richtung vom Nutzer gepinnt („Supabase-Design, dunkel, Supabase-
+Grün-Akzent mit Transparenzen") — Brief schlägt Würfel, kein Seed-Roll.
+Ersetzt die Apple-Welt v1 (Redesign: Produktwahrheit, Funktion, Copy bleiben).
 
 ## Direction contract
 
-THESIS: Ein Messenger, der sich wie eine native Apple-App anfühlt — die
-Übersetzung verschwindet in Selbstverständlichkeit. Verweigert wird der
-WhatsApp-Klon in Grün wie jede Web-App-Anmutung mit dekorativen Karten.
+THESIS: Ein Messenger, der wie ein Supabase-Dashboard aussieht — Entwickler-
+Werkzeug-Ruhe in Dunkel, ein einziger grüner Akzent, Glas statt Farbe.
+Verweigert werden iMessage-Blau, bunte Bubbles und jede helle Variante.
 
-OWN-WORLD: SF-Systemstack; iOS-Systempalette (systemBlue #007AFF/#0A84FF als
-einziger Akzent, systemGray6-Gründe, Hairlines rgba(60,60,67,.29)); iMessage-
-Bubbles 18px, Blau aus/Grau ein; translucente Bars (blur+saturate); stroked
-SVG-Icons in SF-Symbols-Anmutung; Avatare mit personengebundenem Farbverlauf
-(Snapchat-Hauch); Light + Dark. Einzige weitere Farbe: Präsenz-Dot in
-systemGreen (#34C759/#30D158) als rein semantisches Signal, nie als Akzent.
+OWN-WORLD: Gründe #121212/#181818/#1f1f1f; Borders rgba(255,255,255,.09/.14);
+Akzent #3ECF8E (Hover #2fb87a), dunkler Text auf Grün; eigene Bubbles als
+grün getöntes Glas (rgba(62,207,142,.14) + grüne Hairline), fremde als Weiß-
+Glas (.05 + Hairline); Bars translucent (blur+saturate); Radien 6/8/12px;
+SF/Inter-Systemstack, kompakt (14/15px); stroked SVG-Icons; Avatare als
+dunkle Fläche mit personengebundenem Farbton; grüne Glows als Tiefe.
 
-STORY: Öffnen → „Chats" als Large Title → schreiben in eigener Sprache, lesen
-in eigener Sprache; unter der letzten eigenen Nachricht „Zugestellt/Gelesen";
-Kontakt entsteht nur über die teilbare User-ID in den Einstellungen.
+STORY: Öffnen → dunkle Shell mit grünem Glow → schreiben in eigener Sprache,
+lesen in eigener; „Zugestellt/Gelesen" unter der letzten eigenen Nachricht;
+Kontakt nur über die grüne ID-Karte in den Einstellungen.
 
-FIRST VIEWPORT: Links Chatliste mit Large Title „Chats", Compose-Icon oben
-rechts; rechts Konversation: zentrierter translucenter Header (Name + Status),
-Bubble-Verlauf, unten Eingabe-Pille mit blauem Pfeil-Kreis. Mobil: Liste
-vollflächig, Konversation schiebt sich darüber.
+FIRST VIEWPORT: Links Chatliste, Titel „Chats" mit grünem Compose-Icon;
+rechts Konversation: zentrierter Glas-Header, Bubble-Verlauf auf #121212,
+Eingabe-Pille mit Hairline, grüner Sende-Kreis. Mobil: Liste vollflächig,
+Konversation darüber.
 
-FORM: iOS-native App-Grammatik (brief-pinned; Platz 1 ohne Roll — Nutzer hat
-die Richtung festgelegt; kein Seed-Key, Substitution wegen autonomer Session).
+FORM: Supabase-Dashboard-Grammatik (brief-pinned; kein Seed-Key, autonome
+Session).
 
-SIGNATURE INTERACTION: Senden — die Bubble löst sich mit Feder-Ease aus der
-Eingabe-Pille nach oben; Sheets gleiten iOS-typisch von unten auf.
+SIGNATURE INTERACTION: Senden — Bubble löst sich per FLIP aus der Pille und
+trägt kurz einen grünen Glow; Sheets gleiten von unten auf.
 
 FINISH: unreviewed and undocumented is unfinished; this build ends with the
 finish review, the verdict, DESIGN.md, and every shipping raster carrying its

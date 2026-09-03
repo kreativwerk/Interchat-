@@ -1,6 +1,6 @@
 # InterChat
 
-Ein Messenger mit **automatischer Übersetzung** – im Apple-lastigen Design.
+Ein Messenger mit **automatischer Übersetzung** – im dunklen Supabase-Design.
 
 Jeder Nutzer stellt einmal seine Sprache ein und schreibt einfach in seiner
 eigenen Sprache. Jeder Empfänger – auch in Gruppen – bekommt jede Nachricht
@@ -17,12 +17,13 @@ Originaltext einblenden.
   Nutzersuche. Nur wer deine ID kennt, kann dir schreiben.
 - **Gruppenchats**: per ID Mitglieder einladen, jedes Mitglied liest in seiner
   Sprache; „Zugestellt/Gelesen“ erst, wenn *alle* Mitglieder so weit sind
-- Status im Stil von Apple Nachrichten („Zugestellt“/„Gelesen“ unter der
-  letzten eigenen Nachricht), Tipp-Anzeige, Online-Status, Ungelesen-Zähler
+- Status „Zugestellt“/„Gelesen“ unter der letzten eigenen Nachricht,
+  Tipp-Anzeige, Online-Status, Ungelesen-Zähler
 - Registrierung/Login (bcrypt + JWT), Sprache jederzeit änderbar –
   der Verlauf wird beim nächsten Öffnen in die neue Sprache übersetzt
-- **Apple-lastige Oberfläche**: iOS-Systempalette, iMessage-Bubbles,
-  translucente Bars, Sheets, heller **und** dunkler Modus, responsiv
+- **Supabase-Designsprache**: durchgehend dunkel, Supabase-Grün als einziger
+  Akzent, Transparenzen als Material (Glas-Bars, getönte Bubbles, grüne
+  Glows), Sheets, responsiv
 - Persistenz per SQLite (in Node.js eingebaut, keine extra Datenbank nötig)
 
 ## Schnellstart
@@ -92,7 +93,7 @@ server/
 public/
   index.html    Single-Page-App ohne Build-Schritt (SVG-Icon-Sprite)
   app.js        Client-Logik (Chats, Gruppen, Sheets, Socket.IO)
-  style.css     iOS-Designsprache, Light/Dark über prefers-color-scheme
+  style.css     Supabase-Designsprache (dunkel, Grün-Akzent, Glas-Materialien)
 scripts/
   e2e.js        End-to-End-Test (npm run test:e2e)
 ```
@@ -104,7 +105,7 @@ genau einmal (Cache). In Gruppen gilt eine eigene Nachricht erst dann als
 zugestellt/gelesen, wenn **alle** anderen Mitglieder sie erhalten/gelesen
 haben.
 
-Produkt- und Design-Entscheidungen sind in `PRODUCT.md` und
+Produkt- und Design-Entscheidungen sind in `PRODUCT.md`, `DESIGN.md` und
 `.impeccable/surfaces/` dokumentiert.
 
 ## Roadmap-Ideen
